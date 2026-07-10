@@ -1,9 +1,10 @@
 <?php include "../db_con.php";
-
+session_start();
 
 $p_name = $_POST['p_name'];
+$active_owner_id = $_SESSION['active_owner_id'] ?? 1;
 
-$sql =  "SELECT * FROM invoice WHERE p_name = '$p_name'";
+$sql =  "SELECT * FROM orders WHERE p_name = '$p_name' AND owner_id = $active_owner_id";
 $result = mysqli_query($conn,$sql);
 
 echo '<option id="non" value="">-- Select Design No -- </option>';

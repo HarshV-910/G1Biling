@@ -26,7 +26,7 @@ if($o_id){?>
 
         <div class="text-center">
           <button type="button" class="btn btn-secondary px-5 m-2" data-bs-dismiss="modal">
-            <a href="owner.php">No</a>
+            <a href="settings.php">No</a>
           </button>
           <button type="submit" class="btn btn-danger px-5 m-2" name="o_delete">Yes</button>
         </div>
@@ -79,7 +79,7 @@ if($i_id)
 
         <div class="text-center">
           <button type="button" class="btn btn-secondary px-5 m-2" data-bs-dismiss="modal">
-            <a href="invoice.php">No</a>
+            <a href="order.php">No</a>
           </button>
           <button type="submit" class="btn btn-danger px-5 m-2" name="i_delete">Yes</button>
         </div>

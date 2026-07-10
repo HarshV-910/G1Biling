@@ -26,7 +26,7 @@ $id = $_GET['o_id'] ?? null;
         <div>
             <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="owner.php">Owner</a></li>
+                <li class="breadcrumb-item"><a href="settings.php">Settings</a></li>
 
                 <li class="breadcrumb-item active">
                     <?php if($id){ echo 'Update Owner'; }else{ echo 'Add Owner'; } ?>

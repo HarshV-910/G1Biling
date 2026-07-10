@@ -38,7 +38,7 @@ class GridDatatable {
 
 
 
-            document.getElementById("table-invoicejs") && new gridjs.Grid({
+            document.getElementById("table-orderjs") && new gridjs.Grid({
                 columns: [{
                     name: "ID",
                     formatter: function (e) { return gridjs.html('<span class="fw-semibold">' + e + "</span>") }
@@ -48,11 +48,11 @@ class GridDatatable {
                     formatter: (_, owner) => {
                         const id = owner.cells[0].data;
                         return gridjs.html(
-                            `<a href="invoice_print.php?i_id=${id}" class="text-reset"> 
+                            `<a href="order_print.php?i_id=${id}" class="text-reset"> 
                                 <iconify-icon icon="mingcute:print-line"></iconify-icon> 
                             </a>
 
-                            <a href="invoice_form.php?i_id=${id}" class="text-reset"> 
+                            <a href="order_form.php?i_id=${id}" class="text-reset"> 
                                 <iconify-icon icon="mingcute:pencil-line"></iconify-icon> 
                             </a>
 
@@ -65,13 +65,13 @@ class GridDatatable {
             ],
 
                 server: {
-                    url: 'data/invoice_data.php',
+                    url: 'data/order_data.php',
                     then: data => data.invoice.map(invoice => [invoice.i_id, invoice.date, invoice.p_name, invoice.card_no, invoice.design_no, 
                         invoice.details, invoice.fabric, invoice.matching_no, invoice.cut, invoice.total_metre, invoice.rate, invoice.amount, 
                         invoice.status])
                 },
                 pagination: { limit: 10 }, search: !0, sort: !0
-            }).render(document.getElementById("table-invoicejs")),
+            }).render(document.getElementById("table-orderjs")),
 
 
 

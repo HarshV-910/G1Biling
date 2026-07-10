@@ -1,10 +1,9 @@
-<?php include "../db_con.php"?>
+<?php 
+include "../db_con.php";
+session_start();
+$active_owner_id = $_SESSION['active_owner_id'] ?? 1;
 
-
-
-<?php
-
-$result = $conn->query("SELECT * FROM `chalan`");
+$result = $conn->query("SELECT * FROM `chalan` WHERE owner_id = $active_owner_id");
 $chalan = [];
 
 while($row = $result->fetch_assoc()) {
@@ -13,7 +12,4 @@ while($row = $result->fetch_assoc()) {
 
 echo json_encode(['chalan' => $chalan]);
 $conn->close();
-
 ?>
-
-

@@ -4,7 +4,7 @@
 
 $design_no = $_POST['design_no'];
 
-$result = $conn->query("SELECT * FROM  invoice where design_no = $design_no");
+$result = $conn->query("SELECT * FROM  orders where design_no = $design_no");
 
 $data = $result->fetch_assoc();
 

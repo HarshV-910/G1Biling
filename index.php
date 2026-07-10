@@ -1,5 +1,12 @@
-<?php include "header.php"?>
+<?php include "header.php";
+$active_owner_id = $_SESSION['active_owner_id'] ?? 1;
 
+// Fetch stats
+$tot_orders = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM orders WHERE owner_id = $active_owner_id"))['total'] ?? 0;
+$comp_orders = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM orders WHERE owner_id = $active_owner_id AND status = 'Complete'"))['total'] ?? 0;
+$pend_orders = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM orders WHERE owner_id = $active_owner_id AND status = 'Pending'"))['total'] ?? 0;
+$canc_orders = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM orders WHERE owner_id = $active_owner_id AND status = 'Cancel'"))['total'] ?? 0;
+?>
 
         <!-- ==================================================== -->
         <!-- Start right Content here -->
@@ -28,7 +35,7 @@
                                 <div class="row">
                                     <div class="col-6">
                                         <p class="text-muted mb-0 text-truncate">Total Orders</p>
-                                        <h3 class="text-dark mt-2 mb-0">55</h3>
+                                        <h3 class="text-dark mt-2 mb-0"><?php echo $tot_orders; ?></h3>
                                     </div>
 
                                     <div class="col-6">
@@ -48,8 +55,8 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-6">
-                                        <p class="text-muted mb-0 text-truncate">Complite Orders</p>
-                                        <h3 class="text-dark mt-2 mb-0">40</h3>
+                                        <p class="text-muted mb-0 text-truncate">Complete Orders</p>
+                                        <h3 class="text-dark mt-2 mb-0"><?php echo $comp_orders; ?></h3>
                                     </div>
 
                                     <div class="col-6">
@@ -70,7 +77,7 @@
                                 <div class="row">
                                     <div class="col-6">
                                         <p class="text-muted mb-0 text-truncate">Pending Orders</p>
-                                        <h3 class="text-dark mt-2 mb-0">5</h3>
+                                        <h3 class="text-dark mt-2 mb-0"><?php echo $pend_orders; ?></h3>
                                     </div>
 
                                     <div class="col-6">
@@ -91,7 +98,7 @@
                                 <div class="row">
                                     <div class="col-6">
                                         <p class="text-muted mb-0 text-truncate">Cancel Orders</p>
-                                        <h3 class="text-dark mt-2 mb-0">10</h3>
+                                        <h3 class="text-dark mt-2 mb-0"><?php echo $canc_orders; ?></h3>
                                     </div>
 
                                     <div class="col-6">
@@ -129,118 +136,24 @@
                                             <th class="py-1">Pending Amount</th>
                                         </thead>
                                         <tbody>
+                                            <?php
+                                            $pending_q = mysqli_query($conn, "SELECT party_id, p_name, mobile_no, p_address, pending_amount FROM party WHERE owner_id = $active_owner_id AND pending_amount > 0 ORDER BY pending_amount DESC LIMIT 8");
+                                            if ($pending_q && mysqli_num_rows($pending_q) > 0) {
+                                                while ($p_row = mysqli_fetch_assoc($pending_q)) {
+                                            ?>
                                             <tr>
-                                                <td>#US523</td>
-                                                <td>24 April, 2024</td>
-                                                <td>
-                                                    <span class="align-middle ms-1">Dan Adrick</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-soft-success">Verified</span>
-                                                </td>
-                                                <td>@omions</td>
+                                                <td><?php echo htmlspecialchars($p_row['party_id']); ?></td>
+                                                <td><?php echo htmlspecialchars($p_row['p_name']); ?></td>
+                                                <td><?php echo htmlspecialchars($p_row['mobile_no']); ?></td>
+                                                <td><?php echo htmlspecialchars($p_row['p_address']); ?></td>
+                                                <td><span class="text-danger fw-bold">₹<?php echo number_format($p_row['pending_amount'], 2); ?></span></td>
                                             </tr>
-                                            <tr>
-                                                <td>#US652</td>
-                                                <td>24 April, 2024</td>
-                                                <td>
-                                                    <span class="align-middle ms-1">Daniel Olsen</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-soft-success">Verified</span>
-                                                </td>
-                                                <td>@alliates</td>
-                                            </tr>
-                                            <tr>
-                                                <td>#US862</td>
-                                                <td>20 April, 2024</td>
-                                                <td>
-                                                    <span class="align-middle ms-1">Jack Roldan</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-soft-warning">Pending</span>
-                                                </td>
-                                                <td>@griys</td>
-                                            </tr>
-                                            <tr>
-                                                <td>#US756</td>
-                                                <td>18 April, 2024</td>
-                                                <td>
-                                                    <span class="align-middle ms-1">Betty Cox</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-soft-success">Verified</span>
-                                                </td>
-                                                <td>@reffon</td>
-                                            </tr>
-                                            <tr>
-                                                <td>#US420</td>
-                                                <td>18 April, 2024</td>
-                                                <td>
-                                                    <span class="align-middle ms-1">Carlos
-                                                        Johnson</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-soft-danger">Blocked</span>
-                                                </td>
-                                                <td>@bebo</td>
-                                            </tr>
-                                            <tr>
-                                                <td>#US523</td>
-                                                <td>24 April, 2024</td>
-                                                <td>
-                                                    <span class="align-middle ms-1">Dan Adrick</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-soft-success">Verified</span>
-                                                </td>
-                                                <td>@omions</td>
-                                            </tr>
-                                            <tr>
-                                                <td>#US652</td>
-                                                <td>24 April, 2024</td>
-                                                <td>
-                                                    <span class="align-middle ms-1">Daniel Olsen</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-soft-success">Verified</span>
-                                                </td>
-                                                <td>@alliates</td>
-                                            </tr>
-                                            <tr>
-                                                <td>#US862</td>
-                                                <td>20 April, 2024</td>
-                                                <td>
-                                                    <span class="align-middle ms-1">Jack Roldan</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-soft-warning">Pending</span>
-                                                </td>
-                                                <td>@griys</td>
-                                            </tr>
-                                            <tr>
-                                                <td>#US756</td>
-                                                <td>18 April, 2024</td>
-                                                <td>
-                                                    <span class="align-middle ms-1">Betty Cox</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-soft-success">Verified</span>
-                                                </td>
-                                                <td>@reffon</td>
-                                            </tr>
-                                            <tr>
-                                                <td>#US420</td>
-                                                <td>18 April, 2024</td>
-                                                <td>
-                                                    <span class="align-middle ms-1">Carlos
-                                                        Johnson</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-soft-danger">Blocked</span>
-                                                </td>
-                                                <td>@bebo</td>
-                                            </tr>
+                                            <?php
+                                                }
+                                            } else {
+                                                echo '<tr><td colspan="5" class="text-center text-muted">No pending amounts.</td></tr>';
+                                            }
+                                            ?>
                                         </tbody>
                                     </table>
                                 </div>
@@ -255,10 +168,10 @@
                         <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h4 class="card-title mb-0">
-                                    Recent Pending Order
+                                    Recent Pending Orders
                                 </h4>
 
-                                <a href="invoice.php" class="btn btn-sm btn-light">
+                                <a href="order.php" class="btn btn-sm btn-light">
                                     View All
                                 </a>
                             </div>
@@ -275,106 +188,28 @@
                                             <th class="py-1">Status</th>
                                         </thead>
                                         <tbody>
+                                            <?php
+                                            $orders_q = mysqli_query($conn, "SELECT i_id, date, p_name, amount, status FROM orders WHERE owner_id = $active_owner_id AND status = 'Pending' ORDER BY i_id DESC LIMIT 8");
+                                            if ($orders_q && mysqli_num_rows($orders_q) > 0) {
+                                                while ($o_row = mysqli_fetch_assoc($orders_q)) {
+                                                    $o_date = new DateTime($o_row['date']);
+                                                    $formatted_date = $o_date->format('d M, Y');
+                                            ?>
                                             <tr>
-                                                <td>#98521</td>
-                                                <td>24 April, 2024</td>
-                                                <td>Commisions</td>
-                                                <td>$120.55</td>
+                                                <td>#<?php echo htmlspecialchars($o_row['i_id']); ?></td>
+                                                <td><?php echo htmlspecialchars($formatted_date); ?></td>
+                                                <td><?php echo htmlspecialchars($o_row['p_name']); ?></td>
+                                                <td>₹<?php echo number_format($o_row['amount'], 2); ?></td>
                                                 <td>
-                                                    <span class="badge bg-success">Cr</span>
+                                                    <span class="badge bg-warning">Pending</span>
                                                 </td>
-
                                             </tr>
-                                            <tr>
-                                                <td>#20158</td>
-                                                <td>24 April, 2024</td>
-                                                <td>Affiliates</td>
-                                                <td>$9.68</td>
-                                                <td>
-                                                    <span class="badge bg-success">Cr</span>
-                                                </td>
-
-                                            </tr>
-                                            <tr>
-                                                <td>#36589</td>
-                                                <td>20 April, 2024</td>
-                                                <td>Grocery</td>
-                                                <td>$105.22</td>
-                                                <td>
-                                                    <span class="badge bg-danger">Dr</span>
-                                                </td>
-
-                                            </tr>
-                                            <tr>
-                                                <td>#95362</td>
-                                                <td>18 April, 2024</td>
-                                                <td>Refunds</td>
-                                                <td>$80.59</td>
-                                                <td>
-                                                    <span class="badge bg-success">Cr</span>
-                                                </td>
-
-                                            </tr>
-                                            <tr>
-                                                <td>#75214</td>
-                                                <td>18 April, 2024</td>
-                                                <td>Bill Payments</td>
-                                                <td>$750.95</td>
-                                                <td>
-                                                    <span class="badge bg-danger">Dr</span>
-                                                </td>
-
-                                            </tr>
-                                            <tr>
-                                                <td>#98521</td>
-                                                <td>24 April, 2024</td>
-                                                <td>Commisions</td>
-                                                <td>$120.55</td>
-                                                <td>
-                                                    <span class="badge bg-success">Cr</span>
-                                                </td>
-
-                                            </tr>
-                                            <tr>
-                                                <td>#20158</td>
-                                                <td>24 April, 2024</td>
-                                                <td>Affiliates</td>
-                                                <td>$9.68</td>
-                                                <td>
-                                                    <span class="badge bg-success">Cr</span>
-                                                </td>
-
-                                            </tr>
-                                            <tr>
-                                                <td>#36589</td>
-                                                <td>20 April, 2024</td>
-                                                <td>Grocery</td>
-                                                <td>$105.22</td>
-                                                <td>
-                                                    <span class="badge bg-danger">Dr</span>
-                                                </td>
-
-                                            </tr>
-                                            <tr>
-                                                <td>#95362</td>
-                                                <td>18 April, 2024</td>
-                                                <td>Refunds</td>
-                                                <td>$80.59</td>
-                                                <td>
-                                                    <span class="badge bg-success">Cr</span>
-                                                </td>
-
-                                            </tr>
-                                            <tr>
-                                                <td>#75214</td>
-                                                <td>18 April, 2024</td>
-                                                <td>Bill Payments</td>
-                                                <td>$750.95</td>
-                                                <td>
-                                                    <span class="badge bg-danger">Dr</span>
-                                                </td>
-
-                                            </tr>
+                                            <?php
+                                                }
+                                            } else {
+                                                echo '<tr><td colspan="5" class="text-center text-muted">No pending orders.</td></tr>';
+                                            }
+                                            ?>
                                         </tbody>
                                     </table>
                                 </div>

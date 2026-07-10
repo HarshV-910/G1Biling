@@ -132,7 +132,7 @@ $("#design_no_1").on("change", function () {
 
     if (Design_no !== "") {
         $.ajax({
-            url: "data/get_invoice.php",
+            url: "data/get_order.php",
             method: "POST",
             data: {
                 design_no: Design_no
@@ -143,6 +143,9 @@ $("#design_no_1").on("change", function () {
                 $("#total_metre_1").val(go.total_metre);
                 $("#rate_1").val(go.rate);
                 $("#amount_1").val(go.amount);
+                if (typeof calculateChalanTotal === "function") {
+                    calculateChalanTotal();
+                }
             }
         });
 
@@ -164,7 +167,7 @@ $("#design_no_2").on("change", function () {
 
     if (Design_no !== "") {
         $.ajax({
-            url: "data/get_invoice.php",
+            url: "data/get_order.php",
             method: "POST",
             data: {
                 design_no: Design_no
@@ -175,6 +178,9 @@ $("#design_no_2").on("change", function () {
                 $("#total_metre_2").val(go.total_metre);
                 $("#rate_2").val(go.rate);
                 $("#amount_2").val(go.amount);
+                if (typeof calculateChalanTotal === "function") {
+                    calculateChalanTotal();
+                }
             }
         });
 
@@ -302,7 +308,7 @@ document.addEventListener("click", function (e) {
 document.addEventListener("keyup", function (e) {
 
     if (e.target.classList.contains("cut")) {
-        totalcut();
+        calculateTotalMetre();
     }
 
 });
@@ -316,52 +322,43 @@ document.addEventListener("keyup", function (e) {
 // });
 
 
-// Total Function invoice
-function totalcut() {
-
+// Total Function invoice (fixed recursion and renamed)
+function calculateTotalMetre() {
     let cutInputs = document.querySelectorAll(".cut");
-
     let total = 0;
-
-    let values = [];
-
     cutInputs.forEach(function (input) {
-
-        let cut = parseInt(input.value) || 0;
-
+        let cut = parseFloat(input.value) || 0;
         total += cut;
-
-        values.push(cut);
-
     });
-
-    // Show Total
-    document.getElementById("total_metre").value = total;
-
-
-    totalcut();
+    let totalMetreEl = document.getElementById("total_metre");
+    if (totalMetreEl) {
+        totalMetreEl.value = total;
+        // recalculate order amount
+        calculateOrderAmount();
+    }
 }
 
 
 
 
-// total price invoice
-function calculateTotal() {
-    let qty = document.getElementById("total_metre").value;
-    let price = document.getElementById("rate").value;
-    // let pay_a = document.getElementById("pay_amount").value;
-
-    let total = qty * price;
-    // let pending_a = total - pay_a;
-
-    document.getElementById("amount").value = total;
-    // document.getElementById("pending_amount").value = pending_a;
-
+// total price invoice (renamed and safe)
+function calculateOrderAmount() {
+    let qtyEl = document.getElementById("total_metre");
+    let priceEl = document.getElementById("rate");
+    let amountEl = document.getElementById("amount");
+    if (qtyEl && priceEl && amountEl) {
+        let qty = parseFloat(qtyEl.value) || 0;
+        let price = parseFloat(priceEl.value) || 0;
+        amountEl.value = (qty * price).toFixed(2).replace(/\.00$/, '');
+    }
 }
 
 // Auto calculate on typing
 // document.getElementById("total_metre").addEventListener("input", calculateTotal);
-document.getElementById("rate").addEventListener("input", calculateTotal);
+let rateEl = document.getElementById("rate");
+if (rateEl) {
+    rateEl.addEventListener("input", calculateOrderAmount);
+}
 // document.getElementById("pay_amount").addEventListener("input", calculateTotal);
 
 
@@ -387,37 +384,29 @@ document.getElementById("rate").addEventListener("input", calculateTotal);
 document.addEventListener("keyup", function (e) {
 
     if (e.target.classList.contains("c_amount")) {
-        totalcut();
+        calculateTotalMetre();
     }
 
 });
 
 
 
-// Total Function invoice
-function totalcut() {
-
+// Total Function invoice (renamed and fixed recursion)
+function calculateTotalChalanAmount() {
     let cutInputs = document.querySelectorAll(".c_amount");
-
     let total = 0;
-
-    let values = [];
-
     cutInputs.forEach(function (input) {
-
-        let cut = parseInt(input.value) || 0;
-
+        let cut = parseFloat(input.value) || 0;
         total += cut;
-
-        values.push(cut);
-
     });
-
-    // Show Total
-    document.getElementById("total_c_amount").value = total;
-
-
-    totalcut();
+    let totalCAmountEl = document.getElementById("total_c_amount");
+    if (totalCAmountEl) {
+        totalCAmountEl.value = total;
+        // Triggers bill discount calculations
+        if (typeof calculateDiscount === "function") {
+            calculateDiscount();
+        }
+    }
 }
 
 
@@ -452,6 +441,7 @@ $(document).ready(function () {
         $("#sgst").val(c_s_gst_Amount.toFixed(2));
         $("#totalgst").val(total_gst_Amount.toFixed(2));
         $("#final_amount").val( Math.round(total_Amount));
+        calculateBillPending();
     }
 
     $(".dis_amount, #dis_rate").on("click change", function () {
@@ -462,19 +452,23 @@ $(document).ready(function () {
 
 // pending Value Calculation
 
-// total price invoice
-function calculateTotal() {
-    let final_amount = document.getElementById("final_amount").value;
-    let pay_a = document.getElementById("paid_amount").value;
-
-    let pending_a = final_amount - pay_a;
-
-    document.getElementById("pending_amount").value = pending_a;
-
+// total price invoice (renamed and safe)
+function calculateBillPending() {
+    let finalEl = document.getElementById("final_amount");
+    let paidEl = document.getElementById("paid_amount");
+    let pendingEl = document.getElementById("pending_amount");
+    if (finalEl && paidEl && pendingEl) {
+        let final_amount = parseFloat(finalEl.value) || 0;
+        let pay_a = parseFloat(paidEl.value) || 0;
+        pendingEl.value = (final_amount - pay_a).toFixed(2).replace(/\.00$/, '');
+    }
 }
 
 // Auto calculate on typing
-document.getElementById("paid_amount").addEventListener("input", calculateTotal);
+let paidAmtEl = document.getElementById("paid_amount");
+if (paidAmtEl) {
+    paidAmtEl.addEventListener("input", calculateBillPending);
+}
 
 
 

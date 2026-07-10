@@ -24,9 +24,9 @@ $today = date('Y-m-d');
             <div class="col-12">
                 <div class="page-title-box">
                     <h4 class="mb-0"><?php if ($id) {
-                                            echo 'Update Invoice';
+                                            echo 'Update Orders';
                                         } else {
-                                            echo 'Add Invoice';
+                                            echo 'Add Orders';
                                         } ?></h4>
 
                 </div>
@@ -35,13 +35,13 @@ $today = date('Y-m-d');
         <div>
             <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="invoice.php">Invoice</a></li>
+                <li class="breadcrumb-item"><a href="order.php">Orders</a></li>
 
                 <li class="breadcrumb-item active">
                     <?php if ($id) {
-                        echo 'Update Invoice';
+                        echo 'Update Orders';
                     } else {
-                        echo 'Add Invoice';
+                        echo 'Add Orders';
                     } ?>
                 </li>
             </ol>
@@ -60,7 +60,7 @@ $today = date('Y-m-d');
 
                             <?php if ($id) {
 
-                                $query = "SELECT * FROM `invoice` WHERE i_id='$id'";
+                                $query = "SELECT * FROM `orders` WHERE i_id='$id'";
                                 $query_run = mysqli_query($conn, $query);
 
                                 if (mysqli_num_rows($query_run) > 0) {
@@ -258,7 +258,7 @@ $today = date('Y-m-d');
                                 <?php
                                 // card_no & order_no Auto increase start;
 
-                                $query = "SELECT * FROM `invoice` ORDER BY i_id DESC LIMIT 1";
+                                $query = "SELECT * FROM `orders` ORDER BY i_id DESC LIMIT 1";
                                 $query_run = mysqli_query($conn, $query);
 
                                 if (mysqli_num_rows($query_run) > 0) {

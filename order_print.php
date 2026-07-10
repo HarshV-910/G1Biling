@@ -1,7 +1,7 @@
 <?php
 include_once 'db_con.php';
 
-$id = $_GET['c_id'] ?? null;
+$id = $_GET['i_id'] ?? null;
 
 ?>
 <!DOCTYPE html>
@@ -11,7 +11,7 @@ $id = $_GET['c_id'] ?? null;
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="author" content="G1 Fashion">
-    <title>Chalan Print</title>
+    <title>Order Print</title>
     <link rel="stylesheet" href="assets/css/invoice_style.css">
     <link rel="shortcut icon" href="assets/img/favicons.ico">
 </head>
@@ -19,12 +19,12 @@ $id = $_GET['c_id'] ?? null;
     <div class="tm_invoice_wrap">
         <div class="tm_invoice tm_style1 tm_type1" id="tm_download_section">
             <?php if ($id) {
-                $query = "SELECT * FROM `chalan` WHERE c_id='$id'";
+                $query = "SELECT * FROM `orders` WHERE i_id='$id'";
                 $query_run = mysqli_query($conn, $query);
 
                 if ($query_run && mysqli_num_rows($query_run) > 0) {
                     $row1 = mysqli_fetch_array($query_run);
-                    $date = $row1['c_date'];
+                    $date = $row1['date'];
                     $dateObject = new DateTime($date);
                     $dynamicDate = $dateObject->format('d-m-Y');
 
@@ -32,12 +32,6 @@ $id = $_GET['c_id'] ?? null;
                     $owner_id = $row1['owner_id'] ?? 1;
                     $owner_query = mysqli_query($conn, "SELECT * FROM users WHERE owner_id='$owner_id'");
                     $owner = mysqli_fetch_assoc($owner_query);
-
-                    // Fetch fabric from orders
-                    $order_no = $row1['order_no'];
-                    $order_q = mysqli_query($conn, "SELECT fabric FROM orders WHERE order_no='$order_no' LIMIT 1");
-                    $order_row = mysqli_fetch_assoc($order_q);
-                    $fabric = $order_row['fabric'] ?? '-';
             ?>
             <div class="tm_invoice_in">
                 <div class="tm_invoice_head tm_top_head tm_mb10 tm_align_center">
@@ -50,7 +44,7 @@ $id = $_GET['c_id'] ?? null;
                         </div>
                     </div>
                     <div class="tm_invoice_right tm_text_right tm_mobile_hide">
-                        <div class="tm_f50 tm_text_uppercase tm_white_color">Chalan</div>
+                        <div class="tm_f50 tm_text_uppercase tm_white_color">Order</div>
                     </div>
                     <div class="tm_shape_bg tm_accent_bg tm_mobile_hide"></div>
                 </div>
@@ -62,7 +56,7 @@ $id = $_GET['c_id'] ?? null;
                         <?php } ?>
                     </div>
                     <div class="tm_invoice_info_list tm_white_color">
-                        <p class="tm_invoice_number tm_m0">Chalan No: <b><?php echo htmlspecialchars($row1['chalan_no']); ?></b></p>
+                        <p class="tm_invoice_number tm_m0">Card No: <b><?php echo htmlspecialchars($row1['card_no']); ?></b></p>
                         <p class="tm_invoice_date tm_m0">Date: <b><?php echo $dynamicDate; ?></b></p>
                     </div>
                     <div class="tm_invoice_seperator tm_accent_bg"></div>
@@ -72,7 +66,6 @@ $id = $_GET['c_id'] ?? null;
                     <p class="tm_mb2" style="color: #111 !important;"><b class="tm_primary_color" style="color: #111 !important;">From:</b> <?php echo htmlspecialchars($owner['name']); ?></p>
                     <p class="tm_mb2" style="color: #111 !important;"><b class="tm_primary_color" style="color: #111 !important;">Address:</b> <?php echo htmlspecialchars($owner['address'] ?? ''); ?></p>
                     <p class="tm_mb2" style="margin-top: 10px; color: #111 !important;"><b class="tm_primary_color" style="color: #111 !important;">To (Party Name):</b> <?php echo htmlspecialchars($row1['p_name']); ?></p>
-                    <p class="tm_mb2" style="color: #111 !important;"><b class="tm_primary_color" style="color: #111 !important;">Order No:</b> <?php echo htmlspecialchars($row1['order_no']); ?></p>
                 </div>
 
                 <div class="tm_table tm_style1" style="color: #111 !important;">
@@ -81,32 +74,42 @@ $id = $_GET['c_id'] ?? null;
                             <thead>
                                 <tr class="tm_accent_bg">
                                     <th class="tm_width_1 tm_semi_bold tm_white_color tm_text_center">No</th>
-                                    <th class="tm_width_3 tm_semi_bold tm_white_color">Design No</th>
-                                    <th class="tm_width_2 tm_semi_bold tm_white_color tm_text_center">Fabric</th>
+                                    <th class="tm_width_3 tm_semi_bold tm_white_color">Description</th>
+                                    <th class="tm_width_1 tm_semi_bold tm_white_color tm_text_center">Fabric</th>
+                                    <th class="tm_width_1 tm_semi_bold tm_white_color tm_text_center">Matching No</th>
                                     <th class="tm_width_1 tm_semi_bold tm_white_color tm_text_center">Cut (Mtr)</th>
-                                    <th class="tm_width_2 tm_semi_bold tm_white_color tm_text_center">Total Metre</th>
+                                    <th class="tm_width_1 tm_semi_bold tm_white_color tm_text_center">Total Metre</th>
                                     <th class="tm_width_1 tm_semi_bold tm_white_color tm_text_center">Rate</th>
-                                    <th class="tm_width_2 tm_semi_bold tm_white_color tm_text_center">Amount</th>
+                                    <th class="tm_width_1 tm_semi_bold tm_white_color tm_text_center">Total Amount</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                <tr>
+                                    <td class="tm_text_center">1</td>
+                                    <td class="tm_primary_color"><b><?php echo htmlspecialchars($row1['details']); ?></b></td>
+                                    <td class="tm_text_center tm_primary_color"><b><?php echo htmlspecialchars($row1['fabric']); ?></b></td>
+                                    <td class="tm_text_center">-</td>
+                                    <td class="tm_text_center">-</td>
+                                    <td class="tm_text_center tm_primary_color">₹ <?php echo htmlspecialchars($row1['total_metre']); ?></td>
+                                    <td class="tm_text_center tm_primary_color">₹ <?php echo htmlspecialchars($row1['rate']); ?></td>
+                                    <td class="tm_text_center tm_primary_color"><b>₹ <?php echo htmlspecialchars($row1['amount']); ?></b></td>
+                                </tr>
                                 <?php
-                                $design_no_arr = explode(' / ', $row1['design_no']);
-                                $cut_arr = explode(' / ', $row1['cut']);
-                                $total_metre_arr = explode(' / ', $row1['total_metre']);
-                                $rate_arr = explode(' / ', $row1['rate']);
-                                $amount_arr = explode(' / ', $row1['amount']);
+                                $matching_no = explode(', ', $row1['matching_no']);
+                                $cut = explode(', ', $row1['cut']);
 
-                                for ($i = 0; $i < count($design_no_arr); $i++) {
+                                for ($i = 0; $i < count($matching_no); $i++) {
+                                    if (empty($matching_no[$i]) && empty($cut[$i])) continue;
                                 ?>
                                 <tr>
-                                    <td class="tm_text_center"><?php echo $i + 1; ?></td>
-                                    <td class="tm_primary_color"><b><?php echo htmlspecialchars($design_no_arr[$i] ?? ''); ?></b></td>
-                                    <td class="tm_text_center"><?php echo htmlspecialchars($fabric); ?></td>
-                                    <td class="tm_text_center"><?php echo htmlspecialchars($cut_arr[$i] ?? '-'); ?></td>
-                                    <td class="tm_text_center tm_primary_color"><?php echo htmlspecialchars($total_metre_arr[$i] ?? '-'); ?></td>
-                                    <td class="tm_text_center tm_primary_color">₹ <?php echo htmlspecialchars($rate_arr[$i] ?? '-'); ?></td>
-                                    <td class="tm_text_center tm_primary_color"><b>₹ <?php echo htmlspecialchars($amount_arr[$i] ?? '-'); ?></b></td>
+                                    <td class="tm_text_center"><?php echo $i + 2; ?></td>
+                                    <td>-</td>
+                                    <td class="tm_text_center">-</td>
+                                    <td class="tm_text_center"><?php echo htmlspecialchars($matching_no[$i] ?? ''); ?></td>
+                                    <td class="tm_text_center"><?php echo htmlspecialchars($cut[$i] ?? ''); ?></td>
+                                    <td class="tm_text_center">-</td>
+                                    <td class="tm_text_center">-</td>
+                                    <td class="tm_text_center">-</td>
                                 </tr>
                                 <?php } ?>
                             </tbody>
@@ -117,14 +120,14 @@ $id = $_GET['c_id'] ?? null;
                 <div class="tm_invoice_footer tm_border_top tm_mb15 tm_m0_md" style="margin-top: 20px; color: #111 !important;">
                     <div class="tm_left_footer">
                         <p class="tm_mb2" style="color: #111 !important;"><b class="tm_primary_color" style="color: #111 !important;">Terms & Conditions:</b></p>
-                        <p class="tm_m0"><b>Goods once sold will not be taken back.</b></p>
+                        <p class="tm_m0"><b>30 - 45 Days Payment Due*</b></p>
                     </div>
                     <div class="tm_right_footer">
                         <table class="tm_mb15">
                             <tbody>
                                 <tr class="tm_gray_bg">
                                     <td class="tm_width_3 tm_primary_color tm_bold" style="color: #111 !important;">Total Amount:</td>
-                                    <td class="tm_width_3 tm_primary_color tm_bold tm_text_right" style="color: #111 !important;">₹ <?php echo htmlspecialchars($row1['total_amount']); ?></td>
+                                    <td class="tm_width_3 tm_primary_color tm_bold tm_text_right" style="color: #111 !important;">₹ <?php echo htmlspecialchars($row1['amount']); ?></td>
                                 </tr>
                             </tbody>
                         </table>

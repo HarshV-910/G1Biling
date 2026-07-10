@@ -77,7 +77,7 @@ if (isset($_POST['o_submit'])) {
 
     if ($result) {
       echo '<div class="alert alert-success text-center fs-4" role="alert"> Data Successfully Send </div>';
-      header('location: owner.php');
+      header('location: settings.php');
     } else {
       echo '<div class="alert alert-danger text-center fs-4" role="alert"> Data Not Send </div>';
     }
@@ -130,7 +130,7 @@ if (isset($_POST['o_update'])) {
     }
 
     echo '<div class="alert alert-success text-center fs-4" role="alert"> Data Update Successfully </div>';
-    header('location: owner.php');
+    header('location: settings.php');
   } else {
     if ($image !== $old && $image !== '' && is_file(owner_image_path($image))) {
       unlink(owner_image_path($image));
@@ -159,7 +159,7 @@ if (isset($_POST['o_delete'])) {
 
   if ($deleteResult) {
     echo '<div class="alert alert-success text-center fs-4" role="alert"> Delete Data Successfully </div>';
-    header('location: owner.php');
+    header('location: settings.php');
   } else {
     echo '<div class="alert alert-danger text-center fs-4" role="alert"> Not Delete Data</div>';
   }
@@ -262,7 +262,7 @@ if (isset($_POST['i_submit'])) {
   $total_amount = $_POST['amount'];
   $status = $_POST['status'];
 
-  $query = "INSERT INTO `invoice`(`date`, `order_no`, `party_id`, `p_name`, `card_no`, `design_no`, `details`, `fabric`, `cut`, `total_metre`, 
+  $query = "INSERT INTO `orders`(`date`, `order_no`, `party_id`, `p_name`, `card_no`, `design_no`, `details`, `fabric`, `cut`, `total_metre`, 
           `matching_no`, `total_matching`, `rate`, `amount`, `status`) 
           VALUES ('$date','$order_no','$party_id','$p_name','$card_no','$design_no','$details','$fabric','$cut','$total_metre','$matching_no',
           '$total_matching','$rate','$amount','$status')";
@@ -272,7 +272,7 @@ if (isset($_POST['i_submit'])) {
 
   if ($result) {
     echo '<div class="alert alert-success text-center fs-4" role="alert"> Data Successfully Send </div>';
-    header('location: invoice.php');
+    header('location: order.php');
   } else {
     echo '<div class="alert alert-danger text-center fs-4" role="alert"> Data Not Send </div>';
   }
@@ -298,7 +298,7 @@ if (isset($_POST['i_update'])) {
   $amount = $_POST['amount'];
   $status = $_POST['status'];
 
-  $update_query = "UPDATE `invoice` SET `date`='$date', `order_no`='$order_no', `party_id`='$party_id', `p_name`='$p_name',
+  $update_query = "UPDATE `orders` SET `date`='$date', `order_no`='$order_no', `party_id`='$party_id', `p_name`='$p_name',
         `card_no`='$card_no', `design_no`='$design_no', `details`='$details', `fabric`='$fabric', `cut`='$cut', `total_metre`='$total_metre',
          `matching_no`='$matching_no', `total_matching`='$total_matching', `rate`='$rate', `amount`='$amount', `status`='$status' 
          WHERE i_id = '$i_id'";
@@ -307,7 +307,7 @@ if (isset($_POST['i_update'])) {
 
   if ($update_query_run) {
     echo '<div class="alert alert-success text-center fs-4" role="alert"> Data Update Successfully </div>';
-    header('location: invoice.php');
+    header('location: order.php');
   } else {
     echo '<div class="alert alert-danger text-center fs-4" role="alert"> Data Not Update </div>';
   }
@@ -318,14 +318,14 @@ if (isset($_POST['i_delete'])) {
 
   $i_id = $_POST['i_id'];
 
-  $delete_query = "DELETE FROM `invoice` WHERE i_id = '$i_id'";
+  $delete_query = "DELETE FROM `orders` WHERE i_id = '$i_id'";
 
 
   $delete_query_run = mysqli_query($conn, $delete_query);
 
   if ($delete_query_run) {
     echo '<div class="alert alert-success text-center fs-4" role="alert"> Delete Data Successfully </div>';
-    header('location: invoice.php');
+    header('location: order.php');
   } else {
     echo '<div class="alert alert-danger text-center fs-4" role="alert"> Not Delete Data</div>';
   }
@@ -419,6 +419,7 @@ if (isset($_POST['c_submit'])) {
 
 
   if ($result) {
+    recalculate_party_amounts($conn, $party_id);
     echo '<div class="alert alert-success text-center fs-4" role="alert"> Data Successfully Send </div>';
     header('location: chalan.php');
   } else {
@@ -502,6 +503,7 @@ if (isset($_POST['c_update'])) {
   $update_query_run = mysqli_query($conn, $update_query);
 
   if ($update_query_run) {
+    recalculate_party_amounts($conn, $party_id);
     echo '<div class="alert alert-success text-center fs-4" role="alert"> Data Update Successfully </div>';
     header('location: chalan.php');
   } else {
@@ -514,11 +516,18 @@ if (isset($_POST['c_delete'])) {
 
   $c_id = $_POST['c_id'];
 
+  $c_q = mysqli_query($conn, "SELECT party_id FROM chalan WHERE c_id = '$c_id'");
+  $c_row = mysqli_fetch_assoc($c_q);
+  $party_id = $c_row['party_id'] ?? null;
+
   $delete_query = "DELETE FROM `chalan` WHERE c_id = '$c_id'";
 
   $delete_query_run = mysqli_query($conn, $delete_query);
 
   if ($delete_query_run) {
+    if ($party_id) {
+        recalculate_party_amounts($conn, $party_id);
+    }
     echo '<div class="alert alert-success text-center fs-4" role="alert"> Delete Data Successfully </div>';
     header('location: chalan.php');
   } else {
@@ -568,6 +577,7 @@ if (isset($_POST['b_submit'])) {
 
 
   if ($result) {
+    recalculate_party_amounts($conn, $party_id);
     echo '<div class="alert alert-success text-center fs-4" role="alert"> Data Successfully Send </div>';
     header('location: bill.php');
   } else {
@@ -607,6 +617,7 @@ if (isset($_POST['b_update'])) {
   $update_query_run = mysqli_query($conn, $update_query);
 
   if ($update_query_run) {
+    recalculate_party_amounts($conn, $party_id);
     echo '<div class="alert alert-success text-center fs-4" role="alert"> Data Update Successfully </div>';
     header('location: bill.php');
   } else {
@@ -621,17 +632,22 @@ if (isset($_POST['b_delete'])) {
 
   $b_id = $_POST['b_id'];
 
-  $delete_query = "DELETE FROM `bill` WHERE b_id = '$b_id'";
+  $b_q = mysqli_query($conn, "SELECT party_id FROM bill WHERE b_id = '$b_id'");
+  $b_row = mysqli_fetch_assoc($b_q);
+  $party_id = $b_row['party_id'] ?? null;
 
+  $delete_query = "DELETE FROM `bill` WHERE b_id = '$b_id'";
 
   $delete_query_run = mysqli_query($conn, $delete_query);
 
   if ($delete_query_run) {
+    if ($party_id) {
+        recalculate_party_amounts($conn, $party_id);
+    }
     echo '<div class="alert alert-success text-center fs-4" role="alert"> Delete Data Successfully </div>';
     header('location: bill.php');
   } else {
     echo '<div class="alert alert-danger text-center fs-4" role="alert"> Not Delete Data</div>';
   }
 }
-
 ?>

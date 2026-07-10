@@ -13,15 +13,15 @@
                     <div class="row">
                          <div class="col-12">
                               <div class="page-title-box">
-                                   <h4 class="mb-0">Invoice</h4>
-                                   <a href="invoice_form.php">
-                                        <button type='button' class='btn btn-sm btn-light'>Add Invoice</button>
+                                   <h4 class="mb-0">Orders</h4>
+                                   <a href="order_form.php">
+                                        <button type='button' class='btn btn-sm btn-light'>New Order</button>
                                    </a>
                               </div>
                               <div>
                                    <ol class="breadcrumb mb-0">
                                         <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
-                                        <li class="breadcrumb-item active">Invoice</li>
+                                        <li class="breadcrumb-item active">Orders</li>
                                    </ol>
                               </div>
                               <hr>
@@ -32,7 +32,7 @@
                     <div class="card">
                          <div class="card-body">
                               <div>
-                                   <div id="table-invoicejs"></div>
+                                   <div id="table-orderjs"></div>
                               </div>
                          </div>
                     </div>

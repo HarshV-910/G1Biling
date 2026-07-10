@@ -195,7 +195,7 @@ $today = date('Y-m-d');
                                                     <option value="">-- Select Design No -- </option>
 
                                                     <?php 
-                                                        $clients  = mysqli_query($conn, "SELECT * FROM invoice");
+                                                        $clients  = mysqli_query($conn, "SELECT * FROM orders");
                                                             while ($row1 = mysqli_fetch_assoc($clients )) {
                                                     ?>
                                                             <option value="<?php echo $row1['design_no']; ?>" 
@@ -254,7 +254,7 @@ $today = date('Y-m-d');
                                                     <option value="">-- Select Design No -- </option>
                                                     
                                                     <?php 
-                                                        $clients  = mysqli_query($conn, "SELECT * FROM invoice");
+                                                        $clients  = mysqli_query($conn, "SELECT * FROM orders");
                                                             while ($row1 = mysqli_fetch_assoc($clients )) {
                                                     ?>
                                                             <option value="<?php echo $row1['design_no']; ?>" 
@@ -520,7 +520,7 @@ $today = date('Y-m-d');
 
 
         <script>
-        function calculateTotal() {
+        function calculateChalanTotal() {
 
             let value1 = parseFloat(document.getElementById("amount_1").value) || 0;
             let value2 = parseFloat(document.getElementById("amount_2").value) || 0;
@@ -529,8 +529,8 @@ $today = date('Y-m-d');
 
         }
 
-        document.getElementById("design_no_1").addEventListener("click", calculateTotal);
-        document.getElementById("design_no_2").addEventListener("click", calculateTotal);
+        document.getElementById("design_no_1").addEventListener("change", calculateChalanTotal);
+        document.getElementById("design_no_2").addEventListener("change", calculateChalanTotal);
         </script>
 
 
