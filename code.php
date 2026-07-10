@@ -2,6 +2,52 @@
 
 <?php
 
+function owner_image_path($imageName)
+{
+  return __DIR__ . '/assets/img/' . $imageName;
+}
+
+function owner_upload_image(array $imageFile, &$errorMessage = null)
+{
+  if (!isset($imageFile['name'])) {
+    return null;
+  }
+
+  $imageNames = is_array($imageFile['name']) ? array_values(array_filter($imageFile['name'], 'strlen')) : [$imageFile['name']];
+  if (count($imageNames) === 0) {
+    return null;
+  }
+
+  if (count($imageNames) !== 1) {
+    $errorMessage = 'Please keep only one owner photo before submitting.';
+    return false;
+  }
+
+  $imageErrors = is_array($imageFile['error']) ? $imageFile['error'] : [$imageFile['error']];
+  $imageTemps = is_array($imageFile['tmp_name']) ? $imageFile['tmp_name'] : [$imageFile['tmp_name']];
+
+  if (($imageErrors[0] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+    $errorMessage = 'Image upload failed. Please choose an image again.';
+    return false;
+  }
+
+  $uploadDir = __DIR__ . '/assets/img/';
+  if (!is_dir($uploadDir)) {
+    mkdir($uploadDir, 0777, true);
+  }
+
+  $sanitizedName = preg_replace('/[^A-Za-z0-9._-]/', '_', basename($imageNames[0]));
+  $storedName = uniqid('owner_', true) . '_' . $sanitizedName;
+  $targetPath = $uploadDir . $storedName;
+
+  if (!move_uploaded_file($imageTemps[0], $targetPath)) {
+    $errorMessage = 'Image could not be saved on server. Check the upload folder permissions.';
+    return false;
+  }
+
+  return $storedName;
+}
+
 if (isset($_POST['o_submit'])) {
 
   $name = $_POST['name'];
@@ -13,11 +59,13 @@ if (isset($_POST['o_submit'])) {
 
 
     // Image Upload
-    $filename = $_FILES['image']['name'];
-    $tempname = $_FILES['image']['tmp_name'];
-    $folder = 'assets/img/'.$filename;
+    $uploadError = null;
+    $filename = owner_upload_image($_FILES['image'], $uploadError);
 
-    move_uploaded_file($tempname, $folder);
+    if ($filename === false) {
+      echo '<div class="alert alert-danger text-center fs-4" role="alert">' . htmlspecialchars($uploadError) . '</div>';
+      exit;
+    }
 
 
 
@@ -46,21 +94,26 @@ if (isset($_POST['o_update'])) {
   $address = $_POST['address'];
   $user_name = $_POST['user_name'];
   $pass = $_POST['pass'];
-  $old=$_POST['old_image'];
+  $old = $_POST['old_image'] ?? '';
 
-if($_FILES['image']['name']!="")
-{
-  unlink("assets/img/".$old);
+  $image = $old;
+  $uploadError = null;
 
-    $image=$_FILES['image']['name'];
+  if (isset($_FILES['image']) && (
+    (!is_array($_FILES['image']['name']) && $_FILES['image']['name'] !== '') ||
+    (is_array($_FILES['image']['name']) && count(array_filter($_FILES['image']['name'], 'strlen')) > 0)
+  )) {
+    $newImage = owner_upload_image($_FILES['image'], $uploadError);
 
-    move_uploaded_file($_FILES['image']['tmp_name'],
-    "assets/img/".$image);
-}
-else
-{
-    $image=$old;
-}
+    if ($newImage === false) {
+      echo '<div class="alert alert-danger text-center fs-4" role="alert">' . htmlspecialchars($uploadError) . '</div>';
+      exit;
+    }
+
+    if ($newImage !== null) {
+      $image = $newImage;
+    }
+  }
 
   $update_query = "UPDATE `users` SET `name`='$name', `mobile_1`='$mobile_1', `mobile_2`='$mobile_2', `address`='$address', `img`='$image',
    `user_name`='$user_name', `pass`='$pass'
@@ -69,9 +122,20 @@ else
   $update_query_run = mysqli_query($conn, $update_query);
 
   if ($update_query_run) {
+    if ($image !== $old && $old !== '') {
+      $oldPath = owner_image_path($old);
+      if (is_file($oldPath)) {
+        unlink($oldPath);
+      }
+    }
+
     echo '<div class="alert alert-success text-center fs-4" role="alert"> Data Update Successfully </div>';
     header('location: owner.php');
   } else {
+    if ($image !== $old && $image !== '' && is_file(owner_image_path($image))) {
+      unlink(owner_image_path($image));
+    }
+
     echo '<div class="alert alert-danger text-center fs-4" role="alert"> Data Not Update </div>';
   }
 }
@@ -80,16 +144,20 @@ if (isset($_POST['o_delete'])) {
 
   $owner_id = $_POST['owner_id'];
 
-$data=$conn->query("SELECT img FROM users WHERE owner_id=$owner_id");
+  $data = $conn->query("SELECT img FROM users WHERE owner_id=$owner_id");
+  $row = $data ? $data->fetch_assoc() : null;
 
-$row=$data->fetch_assoc();
+  if (!empty($row['img'])) {
+    $imagePath = owner_image_path($row['img']);
+    if (is_file($imagePath)) {
+      unlink($imagePath);
+    }
+  }
 
-unlink("assets/img/".$row['img']);
-
-$conn->query("DELETE FROM users WHERE owner_id=$owner_id");
+  $deleteResult = $conn->query("DELETE FROM users WHERE owner_id=$owner_id");
 
 
-  if ($conn) {
+  if ($deleteResult) {
     echo '<div class="alert alert-success text-center fs-4" role="alert"> Delete Data Successfully </div>';
     header('location: owner.php');
   } else {

@@ -175,7 +175,14 @@ class GridDatatable {
                     name: "ID",
                     formatter: function (e) { return gridjs.html('<span class="fw-semibold">' + e + "</span>") }
                 },
-                    "Name", "Mobile Number", "Mobile Number", "Address",  "Image", "User Name", "Password", {
+                    "Name", "Mobile Number", "Mobile Number", "Address", {
+                    name: "Image",
+                    formatter: (image) => gridjs.html(
+                        image
+                            ? `<img src="assets/img/${image}" alt="Owner photo" style="width: 56px; height: 56px; object-fit: cover; border-radius: 10px; border: 1px solid rgba(255,255,255,.15);">`
+                            : '<span class="text-muted">No image</span>'
+                    )
+                }, "User Name", "Password", {
                     name: "Actions", width: "120px",
                     formatter: (_, owner) => {
                         const id = owner.cells[0].data;
@@ -194,7 +201,7 @@ class GridDatatable {
                 server: {
 
                     url: 'data/owner_data.php',
-                    then: data => data.owner.map(owner => [owner.owner_id, owner.name, owner.mobile_1, owner.mobile_2, owner.address, owner.img, 
+                    then: data => data.owner.map(owner => [owner.owner_id, owner.name, owner.mobile_1, owner.mobile_2, owner.address, owner.img || '', 
                         owner.user_name, owner.pass])
                 },
                 pagination: { limit: 10 }, search: !0, sort: !0
