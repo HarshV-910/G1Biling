@@ -1,14 +1,6 @@
 <?php
 $id = $_GET['id'] ?? null;
 
-
-// if(isset($_GET['id']))
-// {
-//     $id = $_GET['id'];
-
-//     echo "Selected ID : ".$id;
-// }
-
 ?>
 <?php include "header.php"?>
 
@@ -47,7 +39,7 @@ $id = $_GET['id'] ?? null;
         <div class="card">
             <div class="card-body">
                 <div>
-                    <div id="table-ownerjs"></div>
+                    <div id="table-usersjs"></div>
                 </div>
             </div>
         </div>

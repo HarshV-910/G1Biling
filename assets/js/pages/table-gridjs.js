@@ -170,7 +170,7 @@ class GridDatatable {
 
 
 
-            document.getElementById("table-ownerjs") && new gridjs.Grid({
+            document.getElementById("table-usersjs") && new gridjs.Grid({
                 columns: [{
                     name: "ID",
                     formatter: function (e) { return gridjs.html('<span class="fw-semibold">' + e + "</span>") }
@@ -195,10 +195,10 @@ class GridDatatable {
 
                     url: 'data/owner_data.php',
                     then: data => data.owner.map(owner => [owner.owner_id, owner.name, owner.mobile_1, owner.mobile_2, owner.address, owner.img, 
-                        owner.username, owner.password])
+                        owner.user_name, owner.pass])
                 },
                 pagination: { limit: 10 }, search: !0, sort: !0
-            }).render(document.getElementById("table-ownerjs"));
+            }).render(document.getElementById("table-usersjs"));
 
     }
 }

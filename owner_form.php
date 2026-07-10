@@ -150,7 +150,7 @@ $id = $_GET['o_id'] ?? null;
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <p class="form-label">Password</p>
-                                            <input type="password" id="password" name="password" class="form-control"
+                                            <input type="password" id="password" name="pass" class="form-control"
                                                 placeholder="Please enter password">
                                         </div>
                                     </div>

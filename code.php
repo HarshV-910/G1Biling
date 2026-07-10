@@ -9,25 +9,26 @@ if (isset($_POST['o_submit'])) {
   $mobile_2 = $_POST['mobile_2'];
   $address = $_POST['address'];  
   $user_name = $_POST['user_name'];
-  $password = $_POST['password'];
+  $pass = $_POST['pass'];
 
 
     // Image Upload
-    $imageName = $_FILES['image']['name'];
-    $tmpName   = $_FILES['image']['tmp_name'];
+    $image = $_FILES['image']['name'];
+    $tmp = $_FILES['image']['tmp_name'];
+    $folder = "assets/img".$image;
 
-    $folder = "uploads/";
-
-    // Create unique filename
-    $newImage = time() . "_" . $imageName;
-
-    move_uploaded_file($tmpName, $folder . $newImage);
+   move_uploaded_file($tmp,$folder);
 
 
 
-    $query = "INSERT INTO `owner`(`name`, `mobile_1`, `mobile_2`, `address`, `user_name`, `password` , `image`) 
-              VALUES ('$name','$mobile_1','$mobile_2','$address','$user_name','$password','$newImage')";
+
+
+
+    $query = "INSERT INTO `users`(`name`, `mobile_1`, `mobile_2`, `address`, `img`, `user_name`, `pass`) 
+              VALUES ('$name','$mobile_1','$mobile_2','$address','$image','$user_name','$pass')";
     $result = mysqli_query($conn, $query);
+
+
 
     if ($result) {
       echo '<div class="alert alert-success text-center fs-4" role="alert"> Data Successfully Send </div>';
@@ -47,10 +48,10 @@ if (isset($_POST['o_update'])) {
   $mobile_2 = $_POST['mobile_2'];
   $address = $_POST['address'];
   $user_name = $_POST['user_name'];
-  $password = $_POST['password'];
+  $pass = $_POST['pass'];
 
 
-  $update_query = "UPDATE `owner` SET `name`='$name', `mobile_1`='$mobile_1', `mobile_2`='$mobile_2', `address`='$address', `user_name`='$user_name', `password`='$password'
+  $update_query = "UPDATE `users` SET `name`='$name', `mobile_1`='$mobile_1', `mobile_2`='$mobile_2', `address`='$address', `user_name`='$user_name', `pass`='$pass'
          WHERE owner_id = '$owner_id'";
 
   $update_query_run = mysqli_query($conn, $update_query);
@@ -67,7 +68,7 @@ if (isset($_POST['o_delete'])) {
 
   $owner_id = $_POST['owner_id'];
 
-  $delete_query = "DELETE FROM `owner` WHERE owner_id = '$owner_id'";
+  $delete_query = "DELETE FROM `users` WHERE owner_id = '$owner_id'";
 
 
   $delete_query_run = mysqli_query($conn, $delete_query);

@@ -2,7 +2,7 @@
 
 <?php
 
-$result = $conn->query("SELECT * FROM `owner`");
+$result = $conn->query("SELECT * FROM `users`");
 $owner = [];
 
 while($row = $result->fetch_assoc()) {
