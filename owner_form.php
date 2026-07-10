@@ -47,36 +47,48 @@ $id = $_GET['o_id'] ?? null;
 
                             <?php if($id){ 
                                 
-                                $query = "SELECT * FROM `owner` WHERE owner_id='$id'";
+                                $query = "SELECT * FROM `users` WHERE owner_id='$id'";
                                     $query_run = mysqli_query($conn, $query);
 
                                     if (mysqli_num_rows($query_run) > 0) {
                                         while ($row1 = mysqli_fetch_array($query_run)) {
                                 ?>
 
-                            <form method="POST" action="code.php">
+                            <form method="POST" action="code.php" enctype="multipart/form-data">
                                 <div>
                                     <input type="hidden" class="form-control" id='category_id' name="owner_id"
                                         value=<?php echo $id ?> />
-                                    <div class="mb-3">
-                                        <label class="form-label">Name</label>
-                                        <input type="text" name="name" id="name" class="form-control" autofocus
-                                            value="<?php echo $row1['name']?>" placeholder="Please enter your name">
-                                    </div>
-
                                     <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Name</label>
+                                            <input type="text" name="name" id="name" class="form-control" autofocus
+                                                value="<?php echo $row1['name']?>" placeholder="Please enter your name">
+                                        </div>
+
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label">Mobile Number 1</label>
                                             <input type="text" name="mobile_1" id="mobile_1" class="form-control"
                                                 value="<?php echo $row1['mobile_1']?>"
                                                 placeholder="Please enter mobile number 1">
                                         </div>
+
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label">Mobile Number 2</label>
                                             <input type="text" name="mobile_2" id="mobile_2" class="form-control"
                                                 value="<?php echo $row1['mobile_2']?>"
                                                 placeholder="Please enter mobile number 2">
                                         </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Upload Logo</label>
+
+                                            <input type="hidden" name="old_image" class="form-control" value="<?php echo $row1['img']?>">
+                                            
+                                            <input type="file" name="image" class="form-control">
+                                            <img src="assets/img/<?php echo $row1['img']; ?>" width="70">
+
+                                        </div>
+
                                     </div>
 
                                     <div class="mb-3">
@@ -95,8 +107,7 @@ $id = $_GET['o_id'] ?? null;
                                         <div class="col-md-6 mb-3">
                                             <p class="form-label">Password</p>
                                             <input type="text" id="password" name="password" class="form-control"
-                                                value="<?php echo $row1['password']?>"
-                                                placeholder="Please enter password">
+                                                value="<?php echo $row1['pass']?>" placeholder="Please enter password">
                                         </div>
                                     </div>
 
@@ -109,9 +120,12 @@ $id = $_GET['o_id'] ?? null;
 
                             </form>
 
-                            <?PHP }}} else { ?>
+                            <?PHP 
+                                    }
+                                }
+                            } else { ?>
 
-                            <form method="POST" action="code.php">
+                            <form method="POST" action="code.php" enctype="multipart/form-data">
                                 <div>
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -132,7 +146,7 @@ $id = $_GET['o_id'] ?? null;
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label">Upload Logo</label>
-                                            <input type="file" name="image" required class="form-control" placeholder="Please upload logo">
+                                            <input type="file" name="image" required class="form-control">
                                         </div>
                                     </div>
 
@@ -172,7 +186,7 @@ $id = $_GET['o_id'] ?? null;
 
                                                         <div class="dropzone">
                                                             <div class="fallback">
-                                                                <input type="file" name="image" accept="assets/img/*" required>
+                                                                <input type="file" class="form-control" name="image" required >
                                                             </div>
                                                             <div class="dz-message needsclick">
                                                                 <i class="h1 bx bx-cloud-upload"></i>

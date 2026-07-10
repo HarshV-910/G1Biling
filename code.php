@@ -13,19 +13,16 @@ if (isset($_POST['o_submit'])) {
 
 
     // Image Upload
-    $image = $_FILES['image']['name'];
-    $tmp = $_FILES['image']['tmp_name'];
-    $folder = "assets/img".$image;
+    $filename = $_FILES['image']['name'];
+    $tempname = $_FILES['image']['tmp_name'];
+    $folder = 'assets/img/'.$filename;
 
-   move_uploaded_file($tmp,$folder);
-
-
-
+    move_uploaded_file($tempname, $folder);
 
 
 
     $query = "INSERT INTO `users`(`name`, `mobile_1`, `mobile_2`, `address`, `img`, `user_name`, `pass`) 
-              VALUES ('$name','$mobile_1','$mobile_2','$address','$image','$user_name','$pass')";
+              VALUES ('$name','$mobile_1','$mobile_2','$address','$filename','$user_name','$pass')";
     $result = mysqli_query($conn, $query);
 
 
@@ -49,9 +46,24 @@ if (isset($_POST['o_update'])) {
   $address = $_POST['address'];
   $user_name = $_POST['user_name'];
   $pass = $_POST['pass'];
+  $old=$_POST['old_image'];
 
+if($_FILES['image']['name']!="")
+{
+  unlink("assets/img/".$old);
 
-  $update_query = "UPDATE `users` SET `name`='$name', `mobile_1`='$mobile_1', `mobile_2`='$mobile_2', `address`='$address', `user_name`='$user_name', `pass`='$pass'
+    $image=$_FILES['image']['name'];
+
+    move_uploaded_file($_FILES['image']['tmp_name'],
+    "assets/img/".$image);
+}
+else
+{
+    $image=$old;
+}
+
+  $update_query = "UPDATE `users` SET `name`='$name', `mobile_1`='$mobile_1', `mobile_2`='$mobile_2', `address`='$address', `img`='$image',
+   `user_name`='$user_name', `pass`='$pass'
          WHERE owner_id = '$owner_id'";
 
   $update_query_run = mysqli_query($conn, $update_query);
@@ -68,12 +80,16 @@ if (isset($_POST['o_delete'])) {
 
   $owner_id = $_POST['owner_id'];
 
-  $delete_query = "DELETE FROM `users` WHERE owner_id = '$owner_id'";
+$data=$conn->query("SELECT img FROM users WHERE owner_id=$owner_id");
+
+$row=$data->fetch_assoc();
+
+unlink("assets/img/".$row['img']);
+
+$conn->query("DELETE FROM users WHERE owner_id=$owner_id");
 
 
-  $delete_query_run = mysqli_query($conn, $delete_query);
-
-  if ($delete_query_run) {
+  if ($conn) {
     echo '<div class="alert alert-success text-center fs-4" role="alert"> Delete Data Successfully </div>';
     header('location: owner.php');
   } else {
