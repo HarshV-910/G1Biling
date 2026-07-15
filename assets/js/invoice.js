@@ -256,7 +256,7 @@ function loadBillChalanOptions(p_name, callback) {
         success: function(data) {
             var optionsHtml = '<option value="">-- Select Chalan No --</option>';
             $.each(data, function(index, item) {
-                optionsHtml += '<option value="' + item.chalan_no + '" data-amount="' + item.total_amount + '" data-design="' + (item.design_no || '') + '" data-metre="' + (item.total_metre || '') + '" data-rate="' + (item.rate || '') + '">' + item.chalan_no + '</option>';
+                optionsHtml += '<option value="' + item.chalan_no + '" data-amount="' + item.total_amount + '" data-design="' + (item.design_no || '') + '" data-metre="' + (item.total_metre || '') + '" data-rate="' + (item.rate || '') + '" data-amounts="' + (item.amount || '') + '">' + item.chalan_no + '</option>';
             });
             cachedChalanOptions = optionsHtml;
             if (callback) callback(optionsHtml);
@@ -273,7 +273,8 @@ $("#p_name").change(function () {
                 $(".chalan-select").each(function() {
                     $(this).html(options);
                     var row = $(this).closest('.chalan-row');
-                    row.find('.c_amount, .c_design, .c_metre, .c_rate').val('');
+                    row.find('.c_amount, .c_metre, .c_rate').val('');
+                    row.find('.c_design').html('<option value="">-- Select Design --</option>');
                 });
                 calculateBillTotals();
             });
@@ -295,7 +296,7 @@ $(document).ready(function () {
                 success: function(data) {
                     var optionsHtml = '<option value="">-- Select Chalan No --</option>';
                     $.each(data, function(index, item) {
-                        optionsHtml += '<option value="' + item.chalan_no + '" data-amount="' + item.total_amount + '" data-design="' + (item.design_no || '') + '" data-metre="' + (item.total_metre || '') + '" data-rate="' + (item.rate || '') + '">' + item.chalan_no + '</option>';
+                        optionsHtml += '<option value="' + item.chalan_no + '" data-amount="' + item.total_amount + '" data-design="' + (item.design_no || '') + '" data-metre="' + (item.total_metre || '') + '" data-rate="' + (item.rate || '') + '" data-amounts="' + (item.amount || '') + '">' + item.chalan_no + '</option>';
                     });
                     cachedChalanOptions = optionsHtml;
                     
@@ -310,6 +311,7 @@ $(document).ready(function () {
                                 $(this).attr("data-design", matchedItem.design_no);
                                 $(this).attr("data-metre", matchedItem.total_metre);
                                 $(this).attr("data-rate", matchedItem.rate);
+                                $(this).attr("data-amounts", matchedItem.amount);
                             }
                         });
                     });
@@ -324,15 +326,56 @@ $(document).ready(function () {
 $(document).on("change", ".chalan-select", function() {
     var selectEl = $(this);
     var selectedOption = selectEl.find("option:selected");
-    var amount = selectedOption.attr("data-amount") || selectedOption.data("amount") || 0;
-    var design = selectedOption.attr("data-design") || selectedOption.data("design") || '';
-    var metre = selectedOption.attr("data-metre") || selectedOption.data("metre") || '';
-    var rate = selectedOption.attr("data-rate") || selectedOption.data("rate") || '';
+    
+    var designStr = selectedOption.attr("data-design") || '';
+    var metreStr = selectedOption.attr("data-metre") || '';
+    var rateStr = selectedOption.attr("data-rate") || '';
+    var amountStr = selectedOption.attr("data-amounts") || '';
+    
+    var designs = designStr ? designStr.split(/\s*\/\s*/) : [];
+    var metres = metreStr ? metreStr.split(/\s*\/\s*/) : [];
+    var rates = rateStr ? rateStr.split(/\s*\/\s*/) : [];
+    var amounts = amountStr ? amountStr.split(/\s*\/\s*/) : [];
+    
     var row = selectEl.closest(".chalan-row");
-    row.find(".c_amount").val(amount);
-    row.find(".c_design").val(design);
+    var designSelect = row.find(".c_design");
+    
+    // Clear and populate Design select
+    designSelect.html('<option value="">-- Select Design --</option>');
+    $.each(designs, function(index, designNo) {
+        if (designNo) {
+            var metreVal = metres[index] || '';
+            var rateVal = rates[index] || '';
+            var amountVal = amounts[index] || '';
+            designSelect.append('<option value="' + designNo + '" data-metre="' + metreVal + '" data-rate="' + rateVal + '" data-amount="' + amountVal + '">' + designNo + '</option>');
+        }
+    });
+    
+    // Clear other fields until a design is selected
+    row.find(".c_metre").val('');
+    row.find(".c_rate").val('');
+    row.find(".c_amount").val('');
+    calculateBillTotals();
+    
+    // Auto-select first design if there's only one
+    if (designs.length === 1 && designs[0]) {
+        designSelect.val(designs[0]).trigger('change');
+    }
+});
+
+// Design select change
+$(document).on("change", ".c_design", function() {
+    var selectEl = $(this);
+    var selectedOption = selectEl.find("option:selected");
+    var metre = selectedOption.attr("data-metre") || '';
+    var rate = selectedOption.attr("data-rate") || '';
+    var amount = selectedOption.attr("data-amount") || '';
+    
+    var row = selectEl.closest(".chalan-row");
     row.find(".c_metre").val(metre);
     row.find(".c_rate").val(rate);
+    row.find(".c_amount").val(amount);
+    
     calculateBillTotals();
 });
 
@@ -418,7 +461,9 @@ $(document).on("click", "#addRow", function () {
             '  </div>' +
             '  <div class="col-md-2 col-6">' +
             '    <label class="form-label">Design No.</label>' +
-            '    <input type="text" class="form-control c_design" readonly>' +
+            '    <select name="design_no[]" class="form-select c_design" required>' +
+            '      <option value="">-- Select Design --</option>' +
+            '    </select>' +
             '  </div>' +
             '  <div class="col-md-2 col-6">' +
             '    <label class="form-label">Total Metre</label>' +
