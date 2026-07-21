@@ -50,7 +50,7 @@
     <!-- Flatepicker Demo Js -->
     <script src="assets/js/pages/form-flatepicker.js"></script>
 
-    <script src="assets/js/invoice.js"></script>
+    <script src="assets/js/invoice.js?v=<?php echo time(); ?>"></script>
 
 </body>
 

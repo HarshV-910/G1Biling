@@ -158,87 +158,89 @@ $today = date('Y-m-d');
                                                         <hr>
 
 
-                                                         <div id="BillForm">
-                                                             <?php
-                                                             $chalan_nos = explode(', ', $row['chalan_no']);
-                                                             $c_amounts = explode(', ', $row['c_amount']);
-                                                             $saved_designs = isset($row['design_no']) ? explode(', ', $row['design_no']) : [];
+                                                          <div id="BillForm">
+                                                              <?php
+                                                              $chalan_nos = explode(', ', $row['chalan_no']);
+                                                              $c_amounts = explode(', ', $row['c_amount']);
+                                                              $saved_designs = isset($row['design_no']) ? explode(', ', $row['design_no']) : [];
+                                                              $saved_metres = isset($row['total_metre']) ? explode(', ', $row['total_metre']) : [];
+                                                              $saved_rates = isset($row['rate']) ? explode(', ', $row['rate']) : [];
 
-                                                             $p_name_current = $row['p_name'];
-                                                             $active_owner_id = $_SESSION['active_owner_id'] ?? 1;
-                                                             $party_chalans_query = mysqli_query($conn, "SELECT chalan_no, design_no, total_metre, rate, amount, total_amount FROM chalan WHERE p_name = '" . mysqli_real_escape_string($conn, $p_name_current) . "' AND owner_id = $active_owner_id ORDER BY c_id DESC");
-                                                             $chalans_list = [];
-                                                             while ($ch_row = mysqli_fetch_assoc($party_chalans_query)) {
-                                                                 $chalans_list[] = $ch_row;
-                                                             }
+                                                              $p_name_current = $row['p_name'];
+                                                              $active_owner_id = $_SESSION['active_owner_id'] ?? 1;
+                                                              $party_chalans_query = mysqli_query($conn, "SELECT chalan_no, design_no, total_metre, rate, amount, total_amount FROM chalan WHERE p_name = '" . mysqli_real_escape_string($conn, $p_name_current) . "' AND owner_id = $active_owner_id ORDER BY c_id DESC");
+                                                              $chalans_list = [];
+                                                              while ($ch_row = mysqli_fetch_assoc($party_chalans_query)) {
+                                                                  $chalans_list[] = $ch_row;
+                                                              }
 
-                                                             for ($i = 0; $i < count($chalan_nos); $i++) {
-                                                                 $c_no = $chalan_nos[$i];
-                                                                 $c_amt = $c_amounts[$i] ?? '';
-                                                                 $c_detail_query = mysqli_query($conn, "SELECT design_no, total_metre, rate, amount FROM chalan WHERE chalan_no = '" . mysqli_real_escape_string($conn, $c_no) . "' AND owner_id = $active_owner_id LIMIT 1");
-                                                                 $c_detail = mysqli_fetch_assoc($c_detail_query);
-                                                                 
-                                                                 $ch_designs = array_map('trim', explode('/', $c_detail['design_no'] ?? ''));
-                                                                 $ch_metres = array_map('trim', explode('/', $c_detail['total_metre'] ?? ''));
-                                                                 $ch_rates = array_map('trim', explode('/', $c_detail['rate'] ?? ''));
-                                                                 $ch_amounts = array_map('trim', explode('/', $c_detail['amount'] ?? ''));
+                                                              for ($i = 0; $i < count($chalan_nos); $i++) {
+                                                                  $c_no = $chalan_nos[$i];
+                                                                  $c_amt = $c_amounts[$i] ?? '';
+                                                                  $c_detail_query = mysqli_query($conn, "SELECT design_no, total_metre, rate, amount FROM chalan WHERE chalan_no = '" . mysqli_real_escape_string($conn, $c_no) . "' AND owner_id = $active_owner_id LIMIT 1");
+                                                                  $c_detail = mysqli_fetch_assoc($c_detail_query);
+                                                                  
+                                                                  $ch_designs = array_map('trim', explode('/', $c_detail['design_no'] ?? ''));
+                                                                  $ch_metres = array_map('trim', explode('/', $c_detail['total_metre'] ?? ''));
+                                                                  $ch_rates = array_map('trim', explode('/', $c_detail['rate'] ?? ''));
+                                                                  $ch_amounts = array_map('trim', explode('/', $c_detail['amount'] ?? ''));
 
-                                                                 $saved_design = $saved_designs[$i] ?? ($ch_designs[0] ?? '');
-                                                                 $selected_index = array_search($saved_design, $ch_designs);
-                                                                 if ($selected_index === false) {
-                                                                     $selected_index = 0;
-                                                                 }
-                                                                 $c_design = $ch_designs[$selected_index] ?? '';
-                                                                 $c_metre = $ch_metres[$selected_index] ?? '';
-                                                                 $c_rate = $ch_rates[$selected_index] ?? '';
-                                                             ?>
-                                                             <div class="row chalan-row mb-3 align-items-end">
-                                                                 <div class="col-md-3 col-6 col-remove">
-                                                                     <label class="form-label">Chalan No.</label>
-                                                                     <select name="chalan_no[]" class="form-select chalan-select" required>
-                                                                         <option value="">-- Select Chalan No --</option>
-                                                                         <?php
-                                                                         foreach ($chalans_list as $ch) {
-                                                                             $selected_attr = ($c_no == $ch['chalan_no']) ? "selected" : "";
-                                                                             echo '<option value="' . htmlspecialchars($ch['chalan_no']) . '" data-amount="' . htmlspecialchars($ch['total_amount']) . '" data-design="' . htmlspecialchars($ch['design_no'] ?? '') . '" data-metre="' . htmlspecialchars($ch['total_metre'] ?? '') . '" data-rate="' . htmlspecialchars($ch['rate'] ?? '') . '" data-amounts="' . htmlspecialchars($ch['amount'] ?? '') . '" ' . $selected_attr . '>' . htmlspecialchars($ch['chalan_no']) . '</option>';
-                                                                         }
-                                                                         ?>
-                                                                     </select>
-                                                                 </div>
-                                                                 <div class="col-md-2 col-6">
-                                                                     <label class="form-label">Design No.</label>
-                                                                     <select name="design_no[]" class="form-select c_design" required>
-                                                                         <option value="">-- Select Design --</option>
-                                                                         <?php
-                                                                         for ($j = 0; $j < count($ch_designs); $j++) {
-                                                                             $d_val = $ch_designs[$j];
-                                                                             $m_val = $ch_metres[$j] ?? '';
-                                                                             $r_val = $ch_rates[$j] ?? '';
-                                                                             $a_val = $ch_amounts[$j] ?? '';
-                                                                             $selected_design_attr = ($d_val == $saved_design) ? "selected" : "";
-                                                                             echo '<option value="' . htmlspecialchars($d_val) . '" data-metre="' . htmlspecialchars($m_val) . '" data-rate="' . htmlspecialchars($r_val) . '" data-amount="' . htmlspecialchars($a_val) . '" ' . $selected_design_attr . '>' . htmlspecialchars($d_val) . '</option>';
-                                                                         }
-                                                                         ?>
-                                                                     </select>
-                                                                 </div>
-                                                                 <div class="col-md-2 col-6">
-                                                                     <label class="form-label">Total Metre</label>
-                                                                     <input type="text" class="form-control c_metre" value="<?php echo htmlspecialchars($c_metre); ?>" readonly>
-                                                                 </div>
-                                                                 <div class="col-md-2 col-6">
-                                                                     <label class="form-label">Rate</label>
-                                                                     <input type="text" class="form-control c_rate" value="<?php echo htmlspecialchars($c_rate); ?>" readonly>
-                                                                 </div>
-                                                                 <div class="col-md-2 col-6">
-                                                                     <label class="form-label">Chalan Amount</label>
-                                                                     <input type="text" name="c_amount[]" value="<?php echo htmlspecialchars($c_amt); ?>" class="form-control c_amount" readonly>
-                                                                 </div>
-                                                                 <div class="col-md-1 col-6">
-                                                                     <button type="button" class="btn btn-danger btn-sm c_removeBtn">Remove</button>
-                                                                 </div>
-                                                             </div>
-                                                             <?php } ?>
-                                                         </div>
+                                                                  $saved_design = $saved_designs[$i] ?? ($ch_designs[0] ?? '');
+                                                                  $selected_index = array_search($saved_design, $ch_designs);
+                                                                  if ($selected_index === false) {
+                                                                      $selected_index = 0;
+                                                                  }
+                                                                  $c_design = $ch_designs[$selected_index] ?? '';
+                                                                  $c_metre = $saved_metres[$i] ?? ($ch_metres[$selected_index] ?? '');
+                                                                  $c_rate = $saved_rates[$i] ?? ($ch_rates[$selected_index] ?? '');
+                                                              ?>
+                                                              <div class="row chalan-row mb-3 align-items-end">
+                                                                  <div class="col-md-3 col-6 col-remove">
+                                                                      <label class="form-label">Chalan No.</label>
+                                                                      <select name="chalan_no[]" class="form-select chalan-select" required>
+                                                                          <option value="">-- Select Chalan No --</option>
+                                                                          <?php
+                                                                          foreach ($chalans_list as $ch) {
+                                                                              $selected_attr = ($c_no == $ch['chalan_no']) ? "selected" : "";
+                                                                              echo '<option value="' . htmlspecialchars($ch['chalan_no']) . '" data-amount="' . htmlspecialchars($ch['total_amount']) . '" data-design="' . htmlspecialchars($ch['design_no'] ?? '') . '" data-metre="' . htmlspecialchars($ch['total_metre'] ?? '') . '" data-rate="' . htmlspecialchars($ch['rate'] ?? '') . '" data-amounts="' . htmlspecialchars($ch['amount'] ?? '') . '" ' . $selected_attr . '>' . htmlspecialchars($ch['chalan_no']) . '</option>';
+                                                                          }
+                                                                          ?>
+                                                                      </select>
+                                                                  </div>
+                                                                  <div class="col-md-2 col-6">
+                                                                      <label class="form-label">Design No.</label>
+                                                                      <select name="design_no[]" class="form-select c_design" required>
+                                                                          <option value="">-- Select Design --</option>
+                                                                          <?php
+                                                                          for ($j = 0; $j < count($ch_designs); $j++) {
+                                                                              $d_val = $ch_designs[$j];
+                                                                              $m_val = $ch_metres[$j] ?? '';
+                                                                              $r_val = $ch_rates[$j] ?? '';
+                                                                              $a_val = $ch_amounts[$j] ?? '';
+                                                                              $selected_design_attr = ($d_val == $saved_design) ? "selected" : "";
+                                                                              echo '<option value="' . htmlspecialchars($d_val) . '" data-metre="' . htmlspecialchars($m_val) . '" data-rate="' . htmlspecialchars($r_val) . '" data-amount="' . htmlspecialchars($a_val) . '" ' . $selected_design_attr . '>' . htmlspecialchars($d_val) . '</option>';
+                                                                          }
+                                                                          ?>
+                                                                      </select>
+                                                                  </div>
+                                                                  <div class="col-md-2 col-6">
+                                                                      <label class="form-label">Total Metre</label>
+                                                                      <input type="text" name="total_metre[]" class="form-control c_metre" value="<?php echo htmlspecialchars($c_metre); ?>">
+                                                                  </div>
+                                                                  <div class="col-md-2 col-6">
+                                                                      <label class="form-label">Rate</label>
+                                                                      <input type="text" name="rate[]" class="form-control c_rate" value="<?php echo htmlspecialchars($c_rate); ?>">
+                                                                  </div>
+                                                                  <div class="col-md-2 col-6">
+                                                                      <label class="form-label">Chalan Amount</label>
+                                                                      <input type="text" name="c_amount[]" value="<?php echo htmlspecialchars($c_amt); ?>" class="form-control c_amount" readonly>
+                                                                  </div>
+                                                                  <div class="col-md-1 col-6">
+                                                                      <button type="button" class="btn btn-danger btn-sm c_removeBtn">Remove</button>
+                                                                  </div>
+                                                              </div>
+                                                              <?php } ?>
+                                                          </div></div>
 
                                                          <div class="mb-3">
                                                              <button type="button" id="addRow" class="btn btn-secondary btn-sm">+ Add Chalan Row</button>
@@ -478,11 +480,11 @@ $today = date('Y-m-d');
                                                                 </div>
                                                                 <div class="col-md-2 col-6">
                                                                     <label class="form-label">Total Metre</label>
-                                                                    <input type="text" class="form-control c_metre" readonly>
+                                                                    <input type="text" name="total_metre[]" class="form-control c_metre">
                                                                 </div>
                                                                 <div class="col-md-2 col-6">
                                                                     <label class="form-label">Rate</label>
-                                                                    <input type="text" class="form-control c_rate" readonly>
+                                                                    <input type="text" name="rate[]" class="form-control c_rate">
                                                                 </div>
                                                                 <div class="col-md-2 col-6">
                                                                     <label class="form-label">Chalan Amount</label>

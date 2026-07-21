@@ -121,12 +121,14 @@ $(document).on("click", "#addDesignRow", function() {
         '</div>'
     );
     $("#ChalanForm").append(newRow);
+    updateChalanCardSelects();
 });
 
 // Remove design row
 $(document).on("click", ".remove-design-row", function() {
     $(this).closest(".design-row").remove();
     calculateChalanTotalAmount();
+    updateChalanCardSelects();
 });
 
 // Card select change
@@ -173,12 +175,17 @@ $(document).on("change", ".card-select", function() {
                     row.find(".design-no-val, .design-matching-val, .design-metre, .design-rate, .design-amount, .design-cut-hidden").val('');
                     calculateChalanTotalAmount();
                 }
+                updateChalanCardSelects();
+            },
+            error: function() {
+                updateChalanCardSelects();
             }
         });
     } else {
         row.find(".cuts-container").empty();
         row.find(".design-no-val, .design-matching-val, .design-metre, .design-rate, .design-amount, .design-cut-hidden").val('');
         calculateChalanTotalAmount();
+        updateChalanCardSelects();
     }
 });
 
@@ -277,6 +284,7 @@ $("#p_name").change(function () {
                     row.find('.c_design').html('<option value="">-- Select Design --</option>');
                 });
                 calculateBillTotals();
+                updateBillSelects();
             });
         }
     }
@@ -316,6 +324,7 @@ $(document).ready(function () {
                         });
                     });
                     calculateBillTotals();
+                    updateBillSelects();
                 }
             });
         }
@@ -356,6 +365,7 @@ $(document).on("change", ".chalan-select", function() {
     row.find(".c_rate").val('');
     row.find(".c_amount").val('');
     calculateBillTotals();
+    updateBillSelects();
     
     // Auto-select first design if there's only one
     if (designs.length === 1 && designs[0]) {
@@ -377,12 +387,25 @@ $(document).on("change", ".c_design", function() {
     row.find(".c_amount").val(amount);
     
     calculateBillTotals();
+    updateBillSelects();
+});
+
+// Calculate amount when Metre or Rate is edited manually
+$(document).on("input", ".c_metre, .c_rate", function() {
+    var row = $(this).closest(".chalan-row");
+    var metre = parseFloat(row.find(".c_metre").val()) || 0;
+    var rate = parseFloat(row.find(".c_rate").val()) || 0;
+    var amount = metre * rate;
+    row.find(".c_amount").val(amount.toFixed(2));
+    calculateBillTotals();
+    updateBillSelects();
 });
 
 // Remove chalan row
 $(document).on("click", ".c_removeBtn", function() {
     $(this).closest(".chalan-row").remove();
     calculateBillTotals();
+    updateBillSelects();
 });
 
 function calculateBillTotals() {
@@ -467,11 +490,11 @@ $(document).on("click", "#addRow", function () {
             '  </div>' +
             '  <div class="col-md-2 col-6">' +
             '    <label class="form-label">Total Metre</label>' +
-            '    <input type="text" class="form-control c_metre" readonly>' +
+            '    <input type="text" name="total_metre[]" class="form-control c_metre">' +
             '  </div>' +
             '  <div class="col-md-2 col-6">' +
             '    <label class="form-label">Rate</label>' +
-            '    <input type="text" class="form-control c_rate" readonly>' +
+            '    <input type="text" name="rate[]" class="form-control c_rate">' +
             '  </div>' +
             '  <div class="col-md-2 col-6">' +
             '    <label class="form-label">Chalan Amount</label>' +
@@ -483,6 +506,7 @@ $(document).on("click", "#addRow", function () {
             '</div>'
         );
         $("#BillForm").append(newRow);
+        updateBillSelects();
     } else if ($("#invoiceForm").length > 0) {
         // Invoice/Order Page Row Addition
         var newRow = $(
@@ -544,4 +568,141 @@ function calculateOrderAmount() {
 let orderRateEl = document.getElementById("rate");
 if (orderRateEl) {
     orderRateEl.addEventListener("input", calculateOrderAmount);
+}
+
+// ==================== UNIQUE SELECTION ENFORCEMENT ====================
+
+function updateChalanCardSelects() {
+    if ($("#ChalanForm").length === 0) return;
+    
+    var selectedCards = [];
+    $(".card-select").each(function() {
+        var val = $(this).val();
+        if (val) {
+            selectedCards.push(val);
+        }
+    });
+
+    $(".card-select").each(function() {
+        var currentSelect = $(this);
+        var currentVal = currentSelect.val();
+        
+        currentSelect.find("option").each(function() {
+            var optVal = $(this).val();
+            if (!optVal) return;
+            
+            if (selectedCards.indexOf(optVal) !== -1 && optVal !== currentVal) {
+                $(this).prop('disabled', true).hide();
+            } else {
+                $(this).prop('disabled', false).show();
+            }
+        });
+    });
+}
+
+function getChalanDetails(chalanNo) {
+    var details = { designs: [], metres: [], rates: [], amounts: [] };
+    $(".chalan-select").first().find("option").each(function() {
+        if ($(this).val() == chalanNo) {
+            var designStr = $(this).attr("data-design") || "";
+            var metreStr = $(this).attr("data-metre") || "";
+            var rateStr = $(this).attr("data-rate") || "";
+            var amountStr = $(this).attr("data-amounts") || "";
+            
+            details.designs = designStr ? designStr.split(/\s*\/\s*/) : [];
+            details.metres = metreStr ? metreStr.split(/\s*\/\s*/) : [];
+            details.rates = rateStr ? rateStr.split(/\s*\/\s*/) : [];
+            details.amounts = amountStr ? amountStr.split(/\s*\/\s*/) : [];
+            return false; // break
+        }
+    });
+    return details;
+}
+
+function updateBillSelects() {
+    if ($("#BillForm").length === 0) return;
+
+    // 1. Gather all currently selected (Chalan, Design) pairs
+    var selectedPairs = [];
+    $(".chalan-row").each(function() {
+        var chalan = $(this).find(".chalan-select").val();
+        var design = $(this).find(".c_design").val();
+        if (chalan && design) {
+            selectedPairs.push({ chalan: chalan, design: design, element: this });
+        }
+    });
+
+    // 2. Rebuild Design options for each row, filtering out duplicates
+    $(".chalan-row").each(function() {
+        var row = $(this);
+        var chalanSelect = row.find(".chalan-select");
+        var designSelect = row.find(".c_design");
+        
+        var currentChalan = chalanSelect.val();
+        var currentDesign = designSelect.val();
+        
+        if (!currentChalan) {
+            designSelect.html('<option value="">-- Select Design --</option>');
+            return;
+        }
+        
+        // Get all possible designs and metadata for this chalan
+        var details = getChalanDetails(currentChalan);
+        
+        // Rebuild the design dropdown options
+        var designOptionsHtml = '<option value="">-- Select Design --</option>';
+        $.each(details.designs, function(index, dsn) {
+            if (!dsn) return;
+            
+            // Check if this design is selected in ANOTHER row
+            var isSelectedElsewhere = selectedPairs.some(function(pair) {
+                return pair.chalan === currentChalan && pair.design === dsn && pair.element !== row[0];
+            });
+            
+            // Only add the option if it is not selected elsewhere
+            if (!isSelectedElsewhere) {
+                var metreVal = details.metres[index] || '';
+                var rateVal = details.rates[index] || '';
+                var amountVal = details.amounts[index] || '';
+                designOptionsHtml += '<option value="' + dsn + '" data-metre="' + metreVal + '" data-rate="' + rateVal + '" data-amount="' + amountVal + '">' + dsn + '</option>';
+            }
+        });
+        
+        // Update the select options and restore the selection
+        designSelect.html(designOptionsHtml);
+        if (currentDesign) {
+            designSelect.val(currentDesign);
+        }
+    });
+
+    // 3. Update Chalan dropdown options in all rows
+    $(".chalan-row").each(function() {
+        var row = $(this);
+        var chalanSelect = row.find(".chalan-select");
+        var currentChalanVal = chalanSelect.val();
+        
+        chalanSelect.find("option").each(function() {
+            var chalanOptVal = $(this).val();
+            if (!chalanOptVal) return;
+            
+            var details = getChalanDetails(chalanOptVal);
+            if (details.designs.length === 0) return;
+            
+            var selectedDesignsInOtherRows = 0;
+            $.each(details.designs, function(idx, dsn) {
+                var isSelectedElsewhere = selectedPairs.some(function(pair) {
+                    return pair.chalan === chalanOptVal && pair.design === dsn && pair.element !== row[0];
+                });
+                if (isSelectedElsewhere) {
+                    selectedDesignsInOtherRows++;
+                }
+            });
+            
+            if (selectedDesignsInOtherRows >= details.designs.length) {
+                $(this).prop('disabled', true).hide();
+            } else {
+                $(this).prop('disabled', false).show();
+            }
+        });
+    });
 }

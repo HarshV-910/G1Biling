@@ -524,20 +524,28 @@ if (isset($_POST['b_submit'])) {
   $chalan_no_arr = array_map('trim', $_POST['chalan_no'] ?? []);
   $c_amount_arr = array_map('trim', $_POST['c_amount'] ?? []);
   $design_no_arr = array_map('trim', $_POST['design_no'] ?? []);
+  $total_metre_arr = array_map('trim', $_POST['total_metre'] ?? []);
+  $rate_arr = array_map('trim', $_POST['rate'] ?? []);
 
   $chalans_filtered = [];
   $c_amounts_filtered = [];
   $designs_filtered = [];
+  $total_metres_filtered = [];
+  $rates_filtered = [];
   for ($i = 0; $i < count($chalan_no_arr); $i++) {
     if (!empty($chalan_no_arr[$i])) {
       $chalans_filtered[] = $chalan_no_arr[$i];
       $c_amounts_filtered[] = $c_amount_arr[$i] ?? '0';
       $designs_filtered[] = $design_no_arr[$i] ?? '';
+      $total_metres_filtered[] = $total_metre_arr[$i] ?? '';
+      $rates_filtered[] = $rate_arr[$i] ?? '';
     }
   }
   $chalan_no = implode(", ", $chalans_filtered);
   $c_amount = implode(", ", $c_amounts_filtered);
   $design_no = implode(", ", $designs_filtered);
+  $total_metre = implode(", ", $total_metres_filtered);
+  $rate = implode(", ", $rates_filtered);
 
   $c_total_amount = $_POST['total_c_amount'];
   $d_rate = $_POST['dis_rate'];
@@ -553,9 +561,9 @@ if (isset($_POST['b_submit'])) {
   $paid_amount = $_POST['paid_amount'];
   $pending_amount = $_POST['pending_amount'];
 
-  $query = "INSERT INTO `bill`(`bill_no`, `b_date`, `party_id`, `p_name`, `p_address`, `gst`, `chalan_no`, `design_no`, `c_amount`, `c_total_amount`, `d_rate`, `d_amount`, `cgst`, 
+  $query = "INSERT INTO `bill`(`bill_no`, `b_date`, `party_id`, `p_name`, `p_address`, `gst`, `chalan_no`, `design_no`, `total_metre`, `rate`, `c_amount`, `c_total_amount`, `d_rate`, `d_amount`, `cgst`, 
                                   `sgst`, `total_gst`, `total_amount`, `paid_amount`, `pending_amount`, `cgst_rate`, `sgst_rate`) 
-          VALUES ('$bill_no','$b_date','$party_id','$p_name','$p_address','$gst','$chalan_no','$design_no','$c_amount','$c_total_amount','$d_rate','$d_amount',
+          VALUES ('$bill_no','$b_date','$party_id','$p_name','$p_address','$gst','$chalan_no','$design_no','$total_metre','$rate','$c_amount','$c_total_amount','$d_rate','$d_amount',
           '$cgst','$sgst','$total_gst','$total_amount','$paid_amount','$pending_amount', '$cgst_rate', '$sgst_rate')";
 
   $result = mysqli_query($conn, $query);
@@ -586,20 +594,28 @@ if (isset($_POST['b_update'])) {
   $chalan_no_arr = array_map('trim', $_POST['chalan_no'] ?? []);
   $c_amount_arr = array_map('trim', $_POST['c_amount'] ?? []);
   $design_no_arr = array_map('trim', $_POST['design_no'] ?? []);
+  $total_metre_arr = array_map('trim', $_POST['total_metre'] ?? []);
+  $rate_arr = array_map('trim', $_POST['rate'] ?? []);
 
   $chalans_filtered = [];
   $c_amounts_filtered = [];
   $designs_filtered = [];
+  $total_metres_filtered = [];
+  $rates_filtered = [];
   for ($i = 0; $i < count($chalan_no_arr); $i++) {
     if (!empty($chalan_no_arr[$i])) {
       $chalans_filtered[] = $chalan_no_arr[$i];
       $c_amounts_filtered[] = $c_amount_arr[$i] ?? '0';
       $designs_filtered[] = $design_no_arr[$i] ?? '';
+      $total_metres_filtered[] = $total_metre_arr[$i] ?? '';
+      $rates_filtered[] = $rate_arr[$i] ?? '';
     }
   }
   $chalan_no = implode(", ", $chalans_filtered);
   $c_amount = implode(", ", $c_amounts_filtered);
   $design_no = implode(", ", $designs_filtered);
+  $total_metre = implode(", ", $total_metres_filtered);
+  $rate = implode(", ", $rates_filtered);
 
   $c_total_amount = $_POST['total_c_amount'];
   $d_rate = $_POST['dis_rate'];
@@ -617,7 +633,7 @@ if (isset($_POST['b_update'])) {
 
 
   $update_query = "UPDATE `bill` SET `b_date`='$b_date', `bill_no`='$bill_no', `party_id`='$party_id', `p_name`='$p_name', `p_address`='$p_address', `gst`='$gst', 
-  `chalan_no`='$chalan_no', `design_no`='$design_no', `c_amount`='$c_amount', `c_total_amount`='$c_total_amount', `d_rate`='$d_rate', `d_amount`='$d_amount', `cgst`='$cgst',
+  `chalan_no`='$chalan_no', `design_no`='$design_no', `total_metre`='$total_metre', `rate`='$rate', `c_amount`='$c_amount', `c_total_amount`='$c_total_amount', `d_rate`='$d_rate', `d_amount`='$d_amount', `cgst`='$cgst',
         `sgst`='$sgst', `total_gst`='$total_gst', `total_amount`='$total_amount', `paid_amount`='$paid_amount',`pending_amount`='$pending_amount',
         `cgst_rate`='$cgst_rate', `sgst_rate`='$sgst_rate' WHERE b_id = '$b_id'";
 

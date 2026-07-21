@@ -84,29 +84,31 @@ $id = $_GET['b_id'] ?? null;
                             </thead>
                             <tbody>
                                 <?php
-                                $chalan_no_arr = explode(', ', $row1['chalan_no']);
-                                $c_amount_arr = explode(', ', $row1['c_amount']);
-                                $design_no_arr = isset($row1['design_no']) ? explode(', ', $row1['design_no']) : [];
+                                 $chalan_no_arr = explode(', ', $row1['chalan_no']);
+                                 $c_amount_arr = explode(', ', $row1['c_amount']);
+                                 $design_no_arr = isset($row1['design_no']) ? explode(', ', $row1['design_no']) : [];
+                                 $saved_metre_arr = (isset($row1['total_metre']) && $row1['total_metre'] !== '') ? explode(', ', $row1['total_metre']) : [];
+                                 $saved_rate_arr = (isset($row1['rate']) && $row1['rate'] !== '') ? explode(', ', $row1['rate']) : [];
 
-                                for ($i = 0; $i < count($chalan_no_arr); $i++) {
-                                    $c_no = $chalan_no_arr[$i] ?? '';
-                                    $c_amt = $c_amount_arr[$i] ?? '';
-                                    $c_detail_query = mysqli_query($conn, "SELECT design_no, total_metre, rate FROM chalan WHERE chalan_no = '" . mysqli_real_escape_string($conn, $c_no) . "' AND owner_id = $owner_id LIMIT 1");
-                                    $c_detail = mysqli_fetch_assoc($c_detail_query);
-                                    
-                                    $ch_designs = array_map('trim', explode('/', $c_detail['design_no'] ?? ''));
-                                    $ch_metres = array_map('trim', explode('/', $c_detail['total_metre'] ?? ''));
-                                    $ch_rates = array_map('trim', explode('/', $c_detail['rate'] ?? ''));
-                                    
-                                    $saved_design = $design_no_arr[$i] ?? ($ch_designs[0] ?? '');
-                                    $selected_index = array_search($saved_design, $ch_designs);
-                                    if ($selected_index === false) {
-                                        $selected_index = 0;
-                                    }
-                                    
-                                    $c_design = $ch_designs[$selected_index] ?? '';
-                                    $c_metre = $ch_metres[$selected_index] ?? '';
-                                    $c_rate = $ch_rates[$selected_index] ?? '';
+                                 for ($i = 0; $i < count($chalan_no_arr); $i++) {
+                                     $c_no = $chalan_no_arr[$i] ?? '';
+                                     $c_amt = $c_amount_arr[$i] ?? '';
+                                     $c_detail_query = mysqli_query($conn, "SELECT design_no, total_metre, rate FROM chalan WHERE chalan_no = '" . mysqli_real_escape_string($conn, $c_no) . "' AND owner_id = $owner_id LIMIT 1");
+                                     $c_detail = mysqli_fetch_assoc($c_detail_query);
+                                     
+                                     $ch_designs = array_map('trim', explode('/', $c_detail['design_no'] ?? ''));
+                                     $ch_metres = array_map('trim', explode('/', $c_detail['total_metre'] ?? ''));
+                                     $ch_rates = array_map('trim', explode('/', $c_detail['rate'] ?? ''));
+                                     
+                                     $saved_design = $design_no_arr[$i] ?? ($ch_designs[0] ?? '');
+                                     $selected_index = array_search($saved_design, $ch_designs);
+                                     if ($selected_index === false) {
+                                         $selected_index = 0;
+                                     }
+                                     
+                                     $c_design = $ch_designs[$selected_index] ?? '';
+                                     $c_metre = $saved_metre_arr[$i] ?? ($ch_metres[$selected_index] ?? '');
+                                     $c_rate = $saved_rate_arr[$i] ?? ($ch_rates[$selected_index] ?? '');
                                 ?>
                                 <tr>
                                     <td class="tm_text_center"><?php echo $i + 1; ?></td>

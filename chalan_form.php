@@ -144,14 +144,26 @@ $today = date('Y-m-d');
 
                                 <div id="ChalanForm">
                                     <?php 
+                                    $card_nos = explode(" / ", $row['card_no']);
                                     $design_nos = explode(" / ", $row['design_no']);
+                                    $matching_nos = explode(" / ", $row['matching_no']);
                                     $cuts = explode(" / ", $row['cut']);
                                     $total_metres = explode(" / ", $row['total_metre']);
                                     $rates = explode(" / ", $row['rate']);
                                     $amounts = explode(" / ", $row['amount']);
 
+                                    $p_name_current = $row['p_name'];
+                                    $active_owner_id = $_SESSION['active_owner_id'] ?? 1;
+                                    $order_cards_query = mysqli_query($conn, "SELECT DISTINCT card_no FROM orders WHERE p_name = '" . mysqli_real_escape_string($conn, $p_name_current) . "' AND owner_id = $active_owner_id ORDER BY card_no DESC");
+                                    $cards_list = [];
+                                    while ($order_card = mysqli_fetch_assoc($order_cards_query)) {
+                                        $cards_list[] = $order_card['card_no'];
+                                    }
+
                                     for ($i = 0; $i < count($design_nos); $i++) {
-                                        $d_no = $design_nos[$i];
+                                        $c_card = $card_nos[$i] ?? '';
+                                        $d_no = $design_nos[$i] ?? '';
+                                        $m_no = $matching_nos[$i] ?? '';
                                         $cut_val = $cuts[$i] ?? '';
                                         $metre_val = $total_metres[$i] ?? '';
                                         $rate_val = $rates[$i] ?? '';
@@ -159,22 +171,27 @@ $today = date('Y-m-d');
                                     ?>
                                     <div class="design-row border p-3 mb-3 bg-light rounded position-relative">
                                         <div class="row">
-                                            <div class="col-md-3 col-12 mb-3">
-                                                <label class="form-label font-weight-bold">Design No</label>
-                                                <select class="form-select design-select" name="design_no[]" required>
-                                                    <option value="">-- Select Design No --</option>
+                                            <div class="col-md-2 col-12 mb-3">
+                                                <label class="form-label font-weight-bold">Card No</label>
+                                                <select class="form-select card-select" name="card_no[]" required>
+                                                    <option value="">-- Select Card No --</option>
                                                     <?php 
-                                                    $p_name_current = $row['p_name'];
-                                                    $active_owner_id = $_SESSION['active_owner_id'] ?? 1;
-                                                    $order_designs_query = mysqli_query($conn, "SELECT design_no FROM orders WHERE p_name = '" . mysqli_real_escape_string($conn, $p_name_current) . "' AND owner_id = $active_owner_id");
-                                                    while ($order_design = mysqli_fetch_assoc($order_designs_query)) {
-                                                        $selected_attr = ($d_no == $order_design['design_no']) ? "selected" : "";
-                                                        echo '<option value="' . htmlspecialchars($order_design['design_no']) . '" ' . $selected_attr . '>' . htmlspecialchars($order_design['design_no']) . '</option>';
+                                                    foreach ($cards_list as $card_no_item) {
+                                                        $selected_attr = ($c_card == $card_no_item) ? "selected" : "";
+                                                        echo '<option value="' . htmlspecialchars($card_no_item) . '" ' . $selected_attr . '>' . htmlspecialchars($card_no_item) . '</option>';
                                                     }
                                                     ?>
                                                 </select>
                                             </div>
-                                            <div class="col-md-3 col-12 mb-3">
+                                            <div class="col-md-2 col-6 mb-3">
+                                                <label class="form-label font-weight-bold">Design No</label>
+                                                <input type="text" name="design_no[]" class="form-control design-no-val" value="<?php echo htmlspecialchars($d_no); ?>" readonly>
+                                            </div>
+                                            <div class="col-md-2 col-6 mb-3">
+                                                <label class="form-label font-weight-bold">Matching No</label>
+                                                <input type="text" name="matching_no[]" class="form-control design-matching-val" value="<?php echo htmlspecialchars($m_no); ?>" readonly>
+                                            </div>
+                                            <div class="col-md-2 col-12 mb-3">
                                                 <label class="form-label font-weight-bold">Cuts</label>
                                                 <div class="cuts-section border p-2 rounded bg-white" style="min-height: 38px;">
                                                     <div class="cuts-container d-flex flex-wrap gap-1 align-items-center mb-1">
@@ -196,16 +213,16 @@ $today = date('Y-m-d');
                                                 </div>
                                                 <input type="hidden" name="cut[]" class="design-cut-hidden" value="<?php echo htmlspecialchars($cut_val); ?>">
                                             </div>
-                                            <div class="col-md-2 col-6 mb-3">
-                                                <label class="form-label">Total Metre</label>
+                                            <div class="col-md-1 col-6 mb-3">
+                                                <label class="form-label font-weight-bold">Total Metre</label>
                                                 <input type="text" name="total_metre[]" class="form-control design-metre" value="<?php echo htmlspecialchars($metre_val); ?>" readonly>
                                             </div>
-                                            <div class="col-md-2 col-6 mb-3">
-                                                <label class="form-label">Rate</label>
-                                                <input type="text" name="rate[]" class="form-control design-rate" value="<?php echo htmlspecialchars($rate_val); ?>" readonly>
+                                            <div class="col-md-1 col-6 mb-3">
+                                                <label class="form-label font-weight-bold">Rate</label>
+                                                <input type="text" name="rate[]" class="form-control design-rate" value="<?php echo htmlspecialchars($rate_val); ?>">
                                             </div>
                                             <div class="col-md-2 col-6 mb-3">
-                                                <label class="form-label">Amount</label>
+                                                <label class="form-label font-weight-bold">Amount</label>
                                                 <input type="text" name="amount[]" class="form-control design-amount amount_1" value="<?php echo htmlspecialchars($amount_val); ?>" readonly>
                                             </div>
                                         </div>
